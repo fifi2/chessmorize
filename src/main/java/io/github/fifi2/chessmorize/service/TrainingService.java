@@ -43,8 +43,8 @@ public class TrainingService {
 
     /**
      * Return the next line to review during the training session. Resulting
-     * Lines are sorted by boxId (ASC) and lastStudiedAt (ASC) and an Optional
-     * is returned with the first Line (empty if no Line is found).
+     * Lines are sorted by boxId (ASC) and lastTraining (ASC) and an Optional is
+     * returned with the first Line (empty if no Line is found).
      *
      * @param book The current studied Book.
      * @return An optional of Line. Empty if the training session is over.
@@ -90,7 +90,7 @@ public class TrainingService {
      * @param bookId is the Book id.
      * @param lineId is the Line id.
      * @param result is the training result.
-     * @return a Mono of the updated Book.
+     * @return a Mono of the updated Line.
      */
     public Mono<Line> setLineResult(final UUID bookId,
                                     final UUID lineId,
@@ -134,7 +134,7 @@ public class TrainingService {
     }
 
     /**
-     * Compute the new box id for a given line. It normally does to the next box
+     * Compute the new box id for a given line. It normally goes to the next box
      * unless it already is in the last configured one.
      *
      * @param line is the Line to update.
