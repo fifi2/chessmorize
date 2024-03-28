@@ -144,6 +144,7 @@ public class PgnGamesToBookConverter {
             .san(pgnNode.getSan())
             .uci(pgnNode.getUci())
             .nag(this.buildNag(pgnNode.getNag()))
+            .comment(pgnNode.getComment())
             .nextMoves(Optional
                 .ofNullable(pgnNode.getVariations())
                 .orElse(List.of())

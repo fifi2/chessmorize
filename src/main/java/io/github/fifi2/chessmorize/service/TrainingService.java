@@ -1,6 +1,6 @@
 package io.github.fifi2.chessmorize.service;
 
-import io.github.fifi2.chessmorize.config.properties.BoxProperties;
+import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.NoTrainingLineException;
 import io.github.fifi2.chessmorize.model.Book;
@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +20,7 @@ import java.util.UUID;
 public class TrainingService {
 
     private final BookRepository bookRepository;
-    private final BoxProperties boxProperties;
+    private final TrainingProperties trainingProperties;
 
 
     /**
@@ -52,32 +49,20 @@ public class TrainingService {
     Optional<Line> pickNextLine(final Book book) {
 
         final int currentCalendarSlot = book.getCalendarSlot();
-        final List<Integer> currentBoxes = this.boxProperties.getCalendar()
+        final List<Integer> currentBoxes = this.trainingProperties.getCalendar()
             .get(currentCalendarSlot);
 
         return book.getLines()
             .stream()
             // filter lines related to the session boxes
             .filter(line -> currentBoxes.contains(line.getBoxId()))
-            // filter lines that get back in box 0 during this training session
+            // filter lines that went back in box 0 during this training session
             .filter(line -> Optional
                 .ofNullable(line.getLastCalendarSlot())
                 .map(lastSlot -> !lastSlot.equals(currentCalendarSlot)
                     || line.hasNotBeenTrainedToday())
                 .orElse(true))
-            .sorted(Comparator
-                .comparing(Line::getBoxId)
-                .thenComparing((a, b) -> {
-                    final Instant lastTrainingA = a.getLastTraining();
-                    final Instant lastTrainingB = b.getLastTraining();
-                    if (lastTrainingA == null && lastTrainingB == null)
-                        return 0;
-                    if (lastTrainingA == null)
-                        return -1;
-                    if (lastTrainingB == null)
-                        return 1;
-                    return lastTrainingA.compareTo(lastTrainingB);
-                }))
+            .sorted(Comparator.comparing(Line::getBoxId))
             .findAny();
     }
 
@@ -126,9 +111,12 @@ public class TrainingService {
             .doOnNext(book -> {
                 final int nextSlot = book.getCalendarSlot() + 1;
                 book.setCalendarSlot(
-                    nextSlot >= this.boxProperties.getCalendar().size()
+                    nextSlot >= this.trainingProperties.getCalendar().size()
                         ? 0
                         : nextSlot);
+
+                if (this.trainingProperties.isShuffled())
+                    Collections.shuffle(book.getLines());
             })
             .flatMap(this.bookRepository::update);
     }
@@ -143,7 +131,7 @@ public class TrainingService {
     int computeNextBoxId(final Line line) {
 
         final int nextBoxId = line.getBoxId() + 1;
-        return this.boxProperties.getMaxNumber().compareTo(nextBoxId) >= 0
+        return this.trainingProperties.getMaxNumber().compareTo(nextBoxId) >= 0
             ? nextBoxId
             : line.getBoxId();
     }

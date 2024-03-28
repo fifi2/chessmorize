@@ -15,6 +15,7 @@ public class Move {
     private final String san;
     private final String uci;
     private final Nag nag;
+    private final String comment;
     private final List<Move> nextMoves;
 
     @JsonIgnore

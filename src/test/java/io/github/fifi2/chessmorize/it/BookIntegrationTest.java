@@ -20,7 +20,8 @@ import static io.github.fifi2.chessmorize.helper.Constants.Api;
 import static io.github.fifi2.chessmorize.helper.Constants.Json;
 
 @TestPropertySource(properties = {
-    "resilience4j.retry.configs.default.max-attempts=2"
+    "resilience4j.retry.configs.default.max-attempts=2",
+    "chessmorize.training.shuffled=false"
 })
 class BookIntegrationTest extends AbstractLichessTest {
 
@@ -40,7 +41,7 @@ class BookIntegrationTest extends AbstractLichessTest {
         this.lichessMockResponse("""
             [Event "White: Queen's gambit"]
                         
-            1. d4 d5 2. c4 *
+            1. d4 { Queen's opening } d5 2. c4 *
             """);
 
         // create a book
@@ -77,14 +78,17 @@ class BookIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.CHAPTER_MOVES_SIZE, 0).isEqualTo(1)
             .jsonPath(Json.MOVE(0, 0) + ".id").value(id -> moveId1.set(id.toString()))
             .jsonPath(Json.MOVE(0, 0) + ".san").isEqualTo("d4")
+            .jsonPath(Json.MOVE(0, 0) + ".comment").isEqualTo("Queen's opening")
             .jsonPath(Json.MOVE(0, 0) + ".uci").isEqualTo("d2d4")
             .jsonPath(Json.MOVE(0, 0) + ".nag").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0) + ".id").value(id -> moveId2.set(id.toString()))
             .jsonPath(Json.MOVE(0, 0, 0) + ".san").isEqualTo("d5")
+            .jsonPath(Json.MOVE(0, 0, 0) + ".comment").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0) + ".uci").isEqualTo("d7d5")
             .jsonPath(Json.MOVE(0, 0, 0) + ".nag").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".id").value(id -> moveId3.set(id.toString()))
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".san").isEqualTo("c4")
+            .jsonPath(Json.MOVE(0, 0, 0, 0) + ".comment").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".uci").isEqualTo("c2c4")
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".nag").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".nextMoves").isEmpty()
@@ -92,10 +96,13 @@ class BookIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.LINE_ID, 0).isNotEmpty()
             .jsonPath(Json.LINE_CHAPTER_ID, 0).isEqualTo(chapterId.get())
             .jsonPath(Json.LINE_MOVES_SIZE, 0).isEqualTo(3)
+            .jsonPath(Json.LINE_MOVE_COMMENT, 0, 0).isEqualTo("Queen's opening")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 0).isEqualTo("d2d4")
             .jsonPath(Json.LINE_MOVE_ID, 0, 0).isEqualTo(moveId1.get())
+            .jsonPath(Json.LINE_MOVE_COMMENT, 0, 1).isEmpty()
             .jsonPath(Json.LINE_MOVE_UCI, 0, 1).isEqualTo("d7d5")
             .jsonPath(Json.LINE_MOVE_ID, 0, 1).isEqualTo(moveId2.get())
+            .jsonPath(Json.LINE_MOVE_COMMENT, 0, 2).isEmpty()
             .jsonPath(Json.LINE_MOVE_UCI, 0, 2).isEqualTo("c2c4")
             .jsonPath(Json.LINE_MOVE_ID, 0, 2).isEqualTo(moveId3.get())
             .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)

@@ -121,6 +121,7 @@ class PgnGamesToBookConverterTest {
         assertThat(move.getSan()).isEqualTo("Nf3");
         assertThat(move.getUci()).isEqualTo("g1f3");
         assertThat(move.getNag()).isEqualTo(Nag.GOOD_MOVE);
+        assertThat(move.getComment()).isEqualTo("Knight move");
         final List<Move> nextMoves = move.getNextMoves();
         assertThat(nextMoves).hasSize(2);
         assertThat(nextMoves.getFirst().getSan()).isEqualTo("Nc6");

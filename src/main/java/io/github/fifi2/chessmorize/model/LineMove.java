@@ -13,5 +13,6 @@ public class LineMove {
 
     private final UUID moveId;
     private final String uci;
+    private final String comment;
 
 }

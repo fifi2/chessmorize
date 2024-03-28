@@ -6,6 +6,7 @@ import io.github.fifi2.chessmorize.helper.AbstractLichessTest;
 import io.github.fifi2.chessmorize.helper.ObjectWrapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.time.Instant;
@@ -16,6 +17,9 @@ import static io.github.fifi2.chessmorize.helper.Constants.Api;
 import static io.github.fifi2.chessmorize.helper.Constants.Json;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@TestPropertySource(properties = {
+    "chessmorize.training.shuffled=false"
+})
 class TrainingIntegrationTest extends AbstractLichessTest {
 
     record TrainingInstants(Instant start, Instant end) {
@@ -56,12 +60,12 @@ class TrainingIntegrationTest extends AbstractLichessTest {
         this.lichessMockResponse("""
             [Event "TrainingIntegrationTest: Caro-Kann, Short variation"]
 
-            1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 (4. Be2 e6 5. Nf3) 4... e6 5. Be2 c5 *
+            1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 { Short 1 } (4. Be2 { Short 2 } e6 5. Nf3) 4... e6 5. Be2 c5 *
 
 
             [Event "TrainingIntegrationTest: Caro-Kann, Karpov"]
 
-            1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nd7 { Karpov variation } *
+            1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nd7 { Karpov } *
             """);
 
         // create a book
@@ -91,6 +95,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
         Stream.of(postBody, getBody).forEach(body -> body
             .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
             .jsonPath(Json.NAME).isEqualTo("TrainingIntegrationTest")
+            .jsonPath(Json.CALENDAR_SLOT).isEqualTo(0)
             .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(2)
             // chapter - Short variation
             .jsonPath(Json.CHAPTER_ID, 0).isNotEmpty()
@@ -113,6 +118,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.LINE_MOVE_UCI, 0, 3).isEqualTo("d7d5")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 4).isEqualTo("e4e5")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 5).isEqualTo("c8f5")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 0, 6).isEqualTo("Short 1")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 6).isEqualTo("g1f3")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 7).isEqualTo("e7e6")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 8).isEqualTo("f1e2")
@@ -120,7 +126,6 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
             .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()
             .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 0).isEmpty()
-            .jsonPath(Json.CALENDAR_SLOT).isEqualTo(0)
             // line - Short variation, transposition
             .jsonPath(Json.LINE_ID, 1).isNotEmpty()
             .jsonPath(Json.LINE_ID, 1).value(id -> shortLine2.set(id.toString()))
@@ -132,13 +137,13 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.LINE_MOVE_UCI, 1, 3).isEqualTo("d7d5")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 4).isEqualTo("e4e5")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 5).isEqualTo("c8f5")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 1, 6).isEqualTo("Short 2")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 6).isEqualTo("f1e2")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 7).isEqualTo("e7e6")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 8).isEqualTo("g1f3")
-            .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
-            .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()
-            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 0).isEmpty()
-            .jsonPath(Json.CALENDAR_SLOT).isEqualTo(0)
+            .jsonPath(Json.LINE_BOX_ID, 1).isEqualTo(0)
+            .jsonPath(Json.LINE_LAST_TRAINING, 1).isEmpty()
+            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 1).isEmpty()
             // chapter - Karpov
             .jsonPath(Json.LINE_ID, 2).isNotEmpty()
             .jsonPath(Json.LINE_ID, 2).value(id -> karpovLine.set(id.toString()))
@@ -151,11 +156,11 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.LINE_MOVE_UCI, 2, 4).isEqualTo("b1c3")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 5).isEqualTo("d5e4")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 6).isEqualTo("c3e4")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 2, 7).isEqualTo("Karpov")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 7).isEqualTo("b8d7")
-            .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
-            .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()
-            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 0).isEmpty()
-            .jsonPath(Json.CALENDAR_SLOT).isEqualTo(0));
+            .jsonPath(Json.LINE_BOX_ID, 2).isEqualTo(0)
+            .jsonPath(Json.LINE_LAST_TRAINING, 2).isEmpty()
+            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 2).isEmpty());
 
         this.runAndAssertNextLine(
             bookId.get(),

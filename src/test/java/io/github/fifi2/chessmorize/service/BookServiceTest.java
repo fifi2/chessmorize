@@ -1,13 +1,15 @@
 package io.github.fifi2.chessmorize.service;
 
 import io.github.fifi2.chessmorize.api.LichessApiClient;
+import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
 import io.github.fifi2.chessmorize.model.*;
 import io.github.fifi2.chessmorize.repository.BookRepository;
-import io.github.fifi2.chessmorize.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,7 +19,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,11 +40,15 @@ class BookServiceTest {
     @Mock
     private BookRepository bookRepositoryMock;
 
+    @Mock
+    private TrainingProperties trainingPropertiesMock;
+
     @InjectMocks
     private BookService bookService;
 
-    @Test
-    void createBook() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void createBook(final boolean isShuffled) {
 
         Mockito
             .when(this.lichessApiClientMock.getStudyPGN(STUDY_ID))
@@ -59,6 +67,10 @@ class BookServiceTest {
             .when(this.bookRepositoryMock.save(Mockito.any()))
             .thenAnswer(invocation ->
                 Mono.just(invocation.getArgument(0)));
+
+        Mockito
+            .when(this.trainingPropertiesMock.isShuffled())
+            .thenReturn(isShuffled);
 
         StepVerifier
             .create(this.bookService.createBook(STUDY_ID))
@@ -154,8 +166,9 @@ class BookServiceTest {
             .deleteById(BOOK_ID);
     }
 
-    @Test
-    void createLines() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void createLines(final boolean isShuffled) {
 
         final UUID chapterId1 = UUID.randomUUID();
         final UUID chapterId2 = UUID.randomUUID();
@@ -200,33 +213,44 @@ class BookServiceTest {
                     .build()))
             .build();
 
+        Mockito
+            .when(this.trainingPropertiesMock.isShuffled())
+            .thenReturn(isShuffled);
+
         final List<Line> lines = this.bookService.createLines(book);
 
-        assertThat(lines).hasSize(4);
+        assertThat(lines)
+            .hasSize(4)
+            .extracting(Line::getChapterId)
+            .containsExactlyInAnyOrder(
+                chapterId1,
+                chapterId1,
+                chapterId1,
+                chapterId2);
 
-        assertThat(lines.getFirst().getChapterId()).isEqualTo(chapterId1);
-        assertThat(lines.getFirst().getBoxId()).isZero();
-        assertThat(lines.getFirst().getMoves())
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id11);
+        assertThat(lines)
+            .extracting(Line::getBoxId)
+            .containsOnly(0);
 
-        assertThat(lines.get(1).getChapterId()).isEqualTo(chapterId1);
-        assertThat(lines.get(1).getBoxId()).isZero();
-        assertThat(lines.get(1).getMoves())
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id12);
+        Map<UUID, List<List<UUID>>> linesIdsByChapterId = lines
+            .stream()
+            .collect(Collectors.groupingBy(
+                Line::getChapterId,
+                Collectors.mapping(
+                    line -> line.getMoves()
+                        .stream()
+                        .map(LineMove::getMoveId)
+                        .toList(),
+                    Collectors.toList())));
 
-        assertThat(lines.get(2).getChapterId()).isEqualTo(chapterId1);
-        assertThat(lines.get(2).getBoxId()).isZero();
-        assertThat(lines.get(2).getMoves())
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id2);
+        assertThat(linesIdsByChapterId.get(chapterId1))
+            .containsExactlyInAnyOrder(
+                List.of(id1, id11),
+                List.of(id1, id12),
+                List.of(id2));
 
-        assertThat(lines.getLast().getChapterId()).isEqualTo(chapterId2);
-        assertThat(lines.getLast().getBoxId()).isZero();
-        assertThat(lines.getLast().getMoves())
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id3, id31);
+        assertThat(linesIdsByChapterId.get(chapterId2))
+            .containsExactlyInAnyOrder(List.of(id3, id31));
     }
 
     @Test
@@ -243,6 +267,7 @@ class BookServiceTest {
 
         final Move move = Move.builder()
             .id(id1)
+            .comment("comment")
             .nextMoves(List.of(
                 Move.builder()
                     .id(id11)
@@ -275,6 +300,8 @@ class BookServiceTest {
             .toList();
 
         assertThat(moves).hasSize(4);
+        assertThat(moves.getFirst().getFirst().getComment())
+            .isEqualTo("comment");
         assertThat(moves.getFirst())
             .extracting(LineMove::getMoveId)
             .containsExactly(id1, id11, id111, id1111);
