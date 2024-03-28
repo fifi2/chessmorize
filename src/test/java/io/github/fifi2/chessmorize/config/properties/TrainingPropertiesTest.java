@@ -1,7 +1,6 @@
 package io.github.fifi2.chessmorize.config.properties;
 
 import io.github.fifi2.chessmorize.helper.AbstractSpringBootTest;
-import io.github.fifi2.chessmorize.config.properties.BoxProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,14 +10,15 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BoxPropertiesTest extends AbstractSpringBootTest {
+class TrainingPropertiesTest extends AbstractSpringBootTest {
 
     @Autowired
-    private BoxProperties boxProperties;
+    private TrainingProperties trainingProperties;
 
     @Test
     void getCalendar() {
-        final Map<Integer, Long> frequencies = this.boxProperties.getCalendar()
+
+        final Map<Integer, Long> frequencies = this.trainingProperties.getCalendar()
             .stream()
             .flatMap(Collection::stream)
             .collect(Collectors.groupingBy(
@@ -38,7 +38,7 @@ class BoxPropertiesTest extends AbstractSpringBootTest {
     @Test
     void getMaxNumber() {
 
-        assertThat(this.boxProperties.getMaxNumber()).isEqualTo(5);
+        assertThat(this.trainingProperties.getMaxNumber()).isEqualTo(5);
     }
 
 }

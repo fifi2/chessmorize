@@ -1,5 +1,6 @@
 package io.github.fifi2.chessmorize.config.properties;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -9,11 +10,14 @@ import java.util.Collection;
 import java.util.List;
 
 @Configuration
-@ConfigurationProperties(prefix = "chessmorize.box")
+@ConfigurationProperties(prefix = "chessmorize.training")
 @Validated
 @Data
-public class BoxProperties {
+public class TrainingProperties {
 
+    private boolean shuffled;
+
+    @NotNull
     private List<List<Integer>> calendar;
 
     public Integer getMaxNumber() {

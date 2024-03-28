@@ -42,6 +42,7 @@ public abstract class Constants {
         private static final String _LINE_MOVES = ".moves";
         private static final String _LINE_MOVE_ID = ".moveId";
         private static final String _LINE_MOVE_UCI = ".uci";
+        private static final String _LINE_MOVE_COMMENT = ".comment";
         private static final String _LINE_BOX_ID = ".boxId";
         private static final String _LINE_LAST_TRAINING = ".lastTraining";
         private static final String _LINE_LAST_CALENDAR_SLOT =
@@ -56,6 +57,8 @@ public abstract class Constants {
         private static final String LINE_MOVE = LINE_MOVES + IDX;
         public static final String LINE_MOVE_ID = LINE_MOVE + _LINE_MOVE_ID;
         public static final String LINE_MOVE_UCI = LINE_MOVE + _LINE_MOVE_UCI;
+        public static final String LINE_MOVE_COMMENT =
+            LINE_MOVE + _LINE_MOVE_COMMENT;
         public static final String LINE_BOX_ID = LINE + _LINE_BOX_ID;
         public static final String LINE_LAST_TRAINING =
             LINE + _LINE_LAST_TRAINING;
@@ -70,7 +73,8 @@ public abstract class Constants {
         public static final String NEXT_LINE_MOVES_SIZE =
             NEXT_LINE_MOVES + SIZE;
         private static final String NEXT_LINE_MOVE = NEXT_LINE_MOVES + IDX;
-        public static final String NEXT_LINE_MOVE_UCI = NEXT_LINE_MOVE + _LINE_MOVE_UCI;
+        public static final String NEXT_LINE_MOVE_UCI =
+            NEXT_LINE_MOVE + _LINE_MOVE_UCI;
         public static final String NEXT_LINE_BOX_ID = ROOT + _LINE_BOX_ID;
         public static final String NEXT_LINE_LAST_TRAINING =
             ROOT + _LINE_LAST_TRAINING;
@@ -81,9 +85,8 @@ public abstract class Constants {
                                   final int... move) {
 
             final StringBuilder jsonPathMoves = new StringBuilder();
-            for (int mIdx : move) {
+            for (int mIdx : move)
                 jsonPathMoves.append(".nextMoves[").append(mIdx).append("]");
-            }
             return String.format(CHAPTER, chapter) + jsonPathMoves;
         }
 

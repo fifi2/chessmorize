@@ -1,6 +1,6 @@
 package io.github.fifi2.chessmorize.service;
 
-import io.github.fifi2.chessmorize.config.properties.BoxProperties;
+import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.NoTrainingLineException;
@@ -8,7 +8,6 @@ import io.github.fifi2.chessmorize.helper.converter.StringToList;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Line;
 import io.github.fifi2.chessmorize.repository.BookRepository;
-import io.github.fifi2.chessmorize.service.TrainingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +36,7 @@ class TrainingServiceTest {
     private BookRepository bookRepository;
 
     @Mock
-    private BoxProperties boxProperties;
+    private TrainingProperties trainingProperties;
 
     @InjectMocks
     private TrainingService trainingService;
@@ -63,7 +62,7 @@ class TrainingServiceTest {
                 .build()));
 
         Mockito
-            .when(this.boxProperties.getCalendar())
+            .when(this.trainingProperties.getCalendar())
             .thenReturn(List.of(List.of(0)));
 
         final StepVerifier.FirstStep<Line> nextLineStepVerifier = StepVerifier
@@ -87,18 +86,10 @@ class TrainingServiceTest {
         0 | A | A;0;null;null               | with 1 possible line
         0 | A | A;0;null;null,B;0;null;null | priority to the 1st possible line
         1 | B | A;1;null;null,B;0;null;null | priority to the lowest box
-        2 | B | A;1;null;null,B;0;null;null | priority to the session box #1
-        0 | B | A;1;2;null,B;0;1;null       | priority to the session box #2
-        0 | B | A;1;1;null,B;0;2;null       | priority to the session box #3
-        1 | A | A;0;null;null,B;1;1;null    | box before age
+        2 | B | A;1;null;null,B;0;null;null | priority to the session box
         2 |   | A;1;null;null,B;1;null;null | no line in the session box #1
-        0 |   | A;1;1;null                  | no line in the session box #2
-        2 |   | A;1;1;null                  | no line in the session box #3
-        0 | A | A;0;2;null                  | one line in the 1st box for 2h
-        0 | A | A;0;1;null                  | one line in the 1st box for 1h
-        0 | A | A;0;2;null,B;0;1;null       | priority to the "oldest" line #1
-        0 | B | A;0;1;null,B;0;2;null       | priority to the "oldest" line #2
-        2 | B | A;0;120;2,B;2;1440;1        | do not loop on the same line #1
+        0 |   | A;1;null;null               | no line in the session box #2
+        2 | B | A;0;0;2,B;2;1440;1          | do not loop on the same line #1
         2 | B | A;0;2;2,B;2;10;1            | do not loop on the same line #2
         """)
     void pickNextLine(
@@ -110,7 +101,7 @@ class TrainingServiceTest {
         final Instant now = Instant.now();
 
         Mockito
-            .when(this.boxProperties.getCalendar())
+            .when(this.trainingProperties.getCalendar())
             .thenReturn(List.of(
                 List.of(0),
                 List.of(0, 1),
@@ -169,7 +160,7 @@ class TrainingServiceTest {
 
         if (result) {
             Mockito
-                .when(this.boxProperties.getMaxNumber())
+                .when(this.trainingProperties.getMaxNumber())
                 .thenReturn(2);
         }
 
@@ -252,6 +243,7 @@ class TrainingServiceTest {
         final UUID bookId = UUID.randomUUID();
         final Book book = Book.builder()
             .id(bookId)
+            .lines(List.of())
             .calendarSlot(initialCalendarSlot)
             .build();
 
@@ -263,7 +255,7 @@ class TrainingServiceTest {
         for (int i = 0; i < calendarSize; i++)
             calendar.add(List.of());
         Mockito
-            .when(this.boxProperties.getCalendar())
+            .when(this.trainingProperties.getCalendar())
             .thenReturn(calendar);
 
         Mockito
@@ -314,7 +306,7 @@ class TrainingServiceTest {
             .build();
 
         Mockito
-            .when(this.boxProperties.getMaxNumber())
+            .when(this.trainingProperties.getMaxNumber())
             .thenReturn(boxNumber);
 
         assertThat(this.trainingService.computeNextBoxId(line))

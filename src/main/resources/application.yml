@@ -15,7 +15,8 @@ resilience4j.retry.configs.default:
 chessmorize:
   lichess:
     url: https://lichess.org
-  box:
+  training:
+    shuffled: true
     calendar:
       - [ 0 ]
       - [ 0, 1 ]

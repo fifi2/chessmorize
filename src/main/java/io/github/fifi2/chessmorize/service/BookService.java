@@ -1,6 +1,7 @@
 package io.github.fifi2.chessmorize.service;
 
 import io.github.fifi2.chessmorize.api.LichessApiClient;
+import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
 import io.github.fifi2.chessmorize.model.Book;
@@ -18,9 +19,11 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -31,6 +34,7 @@ public class BookService {
     private final LichessApiClient lichessApiClient;
     private final PgnGamesToBookConverter pgnGamesToBookConverter;
     private final BookRepository bookRepository;
+    private final TrainingProperties trainingProperties;
 
     /**
      * Create a book from a Lichess study id. The method will retrieve the PGN
@@ -92,7 +96,7 @@ public class BookService {
      */
     List<Line> createLines(final Book book) {
 
-        return book.getChapters()
+        List<Line> lines = book.getChapters()
             .stream()
             .flatMap(chapter -> chapter.getNextMoves()
                 .stream()
@@ -102,7 +106,12 @@ public class BookService {
                     .chapterId(chapter.getId())
                     .moves(moveIds)
                     .build()))
-            .toList();
+            .collect(Collectors.toList());
+
+        if (this.trainingProperties.isShuffled())
+            Collections.shuffle(lines);
+
+        return lines;
     }
 
     /**
@@ -120,6 +129,7 @@ public class BookService {
         final LineMove currentLineMove = LineMove.builder()
             .moveId(move.getId())
             .uci(move.getUci())
+            .comment(move.getComment())
             .build();
 
         if (nextMoves.isEmpty()) {
