@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chessmorize - Home</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>My books</h1>
+    <ul id="bookList">
+    </ul>
+
+    <h2>Import a book</h2>
+    <form id="createBookForm">
+        <label for="studyId">Study ID:</label>
+        <input type="text" id="studyId" name="studyId" required>
+        <button type="submit">Import</button>
+    </form>
+
+    <script>
+        var bookListUrl = '/api/book';
+        var createBookUrl = '/api/book';
+
+        function fetchBooks() {
+            fetch(bookListUrl)
+            .then(response => response.json())
+            .then(data => {
+                var bookList = document.getElementById('bookList');
+                bookList.innerHTML = '';
+                data.forEach(book => {
+                    var listItem = document.createElement('li');
+                    var link = document.createElement('a');
+                    link.href = '#';
+                    link.textContent = book.name;
+                    listItem.appendChild(link);
+                    bookList.appendChild(listItem);
+                });
+            });
+        }
+
+        document.getElementById('createBookForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var studyId = document.getElementById('studyId').value;
+            fetch(createBookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ studyId: studyId })
+            })
+            .then(response => {
+                if (response.status === 201) {
+                    fetchBooks();
+                }
+            });
+        });
+
+        fetchBooks();
+    </script>
+</body>
+</html>

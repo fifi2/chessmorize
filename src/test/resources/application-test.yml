@@ -1,0 +1,10 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///chessmorize
+
+resilience4j.retry.configs.default:
+  max-attempts: 1
+
+chessmorize:
+  lichess:
+    url: http://localhost:8081/lichess

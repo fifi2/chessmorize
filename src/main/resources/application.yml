@@ -1,0 +1,51 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:file:///./chessmorize
+  sql:
+    init:
+      mode: always
+
+resilience4j.retry.configs.default:
+  max-attempts: 2
+  retry-exceptions:
+    - io.github.fifi2.chessmorize.error.exception.lichess.Lichess5xxException
+    - io.github.fifi2.chessmorize.error.exception.lichess.LichessTimeoutException
+    - io.github.fifi2.chessmorize.error.exception.lichess.LichessEmptyResponseException
+
+chessmorize:
+  lichess:
+    url: https://lichess.org
+  box:
+    calendar:
+      - [ 0 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 3 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 4 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 3 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 5 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 3 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 4 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
+      - [ 0, 3 ]
+      - [ 0, 1 ]
+      - [ 0, 2 ]
+      - [ 0, 1 ]
