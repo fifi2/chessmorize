@@ -1,6 +1,5 @@
 package io.github.fifi2.chessmorize.converter;
 
-import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Chapter;
 import io.github.fifi2.chessmorize.model.Move;
@@ -89,11 +88,12 @@ class PgnGamesToBookConverterTest {
     @ParameterizedTest(
         name = "{index}: with study name <{0}> and chapter name <{1}>")
     @CsvSource(delimiter = '|', textBlock = """
-        My study | My study: chapter 1 | chapter 1
-        My study | My study : chapter 1 | chapter 1
+        My study: chapter 1         | My study         | chapter 1
+        My study : chapter 1        | My study         | chapter 1
+        My study (White): chapter 1 | My study (White) | chapter 1
         """)
-    void cleanChapterName(final String studyName,
-                          final String chapterName,
+    void cleanChapterName(final String chapterName,
+                          final String studyName,
                           final String expectedChapterName) {
 
         final String cleanedChapterName = this.converter.cleanChapterName(

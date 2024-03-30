@@ -10,6 +10,7 @@ import io.github.fifi2.chessmorize.service.pgn.PgnNode;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Component
 public class PgnGamesToBookConverter {
@@ -126,8 +127,8 @@ public class PgnGamesToBookConverter {
         return Optional
             .ofNullable(chapterName)
             .orElse("")
-            .replaceAll(
-                "^" + studyName + "\\s*:\\s*",
+            .replaceFirst(
+                "^" + Pattern.quote(studyName) + "\\s*:\\s*",
                 "");
     }
 
