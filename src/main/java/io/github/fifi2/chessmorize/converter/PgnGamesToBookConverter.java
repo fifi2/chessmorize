@@ -162,22 +162,19 @@ public class PgnGamesToBookConverter {
     /**
      * Convert PgnNag in their Nag equivalent.
      *
-     * @param nag is the PgnNag to convert.
+     * @param pgnNag is the PgnNag to convert.
      * @return a Nag or null.
      */
-    Nag buildNag(final PgnNag nag) {
+    Nag buildNag(final PgnNag pgnNag) {
 
-        if (nag == null)
+        if (pgnNag == null)
             return null;
 
-        return switch (nag) {
-            case GOOD_MOVE -> Nag.GOOD_MOVE;
-            case MISTAKE -> Nag.MISTAKE;
-            case BRILLANT_MOVE -> Nag.BRILLANT_MOVE;
-            case BLUNDER -> Nag.BLUNDER;
-            case SPECULATIVE_MOVE -> Nag.SPECULATIVE_MOVE;
-            case DUBIOUS_MOVE -> Nag.DUBIOUS_MOVE;
-        };
+        try {
+            return Nag.valueOf(pgnNag.name());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
 }
