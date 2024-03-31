@@ -63,8 +63,10 @@ public class BookRepository {
                 .bind(FIELD_NAME, book.getName())
                 .bind(FIELD_STATE, state)
                 .fetch()
-                .one())
-            .thenReturn(book);
+                .rowsUpdated())
+            .flatMap(rowsUpdated -> rowsUpdated > 0
+                ? Mono.just(book)
+                : Mono.empty());
     }
 
     /**
@@ -82,10 +84,10 @@ public class BookRepository {
                 .bind(FIELD_ID, book.getId())
                 .bind(FIELD_STATE, state)
                 .fetch()
-                .rowsUpdated()
-                .flatMap(rowsUpdated -> rowsUpdated > 0
-                    ? Mono.just(book)
-                    : Mono.empty()));
+                .rowsUpdated())
+            .flatMap(rowsUpdated -> rowsUpdated > 0
+                ? Mono.just(book)
+                : Mono.empty());
     }
 
     /**

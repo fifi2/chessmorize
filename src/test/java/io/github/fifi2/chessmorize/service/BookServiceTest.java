@@ -9,6 +9,7 @@ import io.github.fifi2.chessmorize.repository.BookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -18,9 +19,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -91,7 +95,7 @@ class BookServiceTest {
             .when(this.lichessApiClientMock.getStudyPGN(STUDY_ID))
             .thenReturn(Mono.just("""
                 [Event "invalid pgn"]
-                                
+                
                 1. Da1 *
                 """));
 
@@ -314,6 +318,97 @@ class BookServiceTest {
         assertThat(moves.getLast())
             .extracting(LineMove::getMoveId)
             .containsExactly(id1, id12, id121);
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', textBlock = """
+        chapter-1 | chapter-2 | true  | true  | chapter-1 | true  | true  | true
+        chapter-1 | chapter-2 | true  | true  | chapter-1 | false | false | true
+        chapter-1 | chapter-2 | false | true  | chapter-2 | false | false | false
+        chapter-1 | chapter-2 | false | false | chapter-1 | true  | true  | false
+        """)
+    void toggleChapter(final String chapter1,
+                       final String chapter2,
+                       final boolean initialStatusChapter1,
+                       final boolean initialStatusChapter2,
+                       final String toggledChapterId,
+                       final boolean askedStatus,
+                       final boolean expectedStatusChapter1,
+                       final boolean expectedStatusChapter2) {
+
+        final UUID bookId = UUID.randomUUID();
+        final Map<String, UUID> chapters = Map.of(
+            chapter1, UUID.randomUUID(),
+            chapter2, UUID.randomUUID());
+
+        // TODO Create an helper class to handle Books, Chapters, Lines, etc.
+        final BiFunction<UUID, Boolean, Chapter> chapterBuilder =
+            (chapterId, enabled) -> Chapter.builder()
+                .id(chapterId)
+                .enabled(enabled)
+                .build();
+
+        // TODO Create an helper class to handle Books, Chapters, Lines, etc.
+        final Function<UUID, Line> lineBuilder =
+            chapterId -> Line.builder()
+                .chapterId(chapterId)
+                .build();
+
+        final List<Line> lines = new ArrayList<>();
+        if (initialStatusChapter1)
+            lines.add(lineBuilder.apply(chapters.get(chapter1)));
+        if (initialStatusChapter2)
+            lines.add(lineBuilder.apply(chapters.get(chapter2)));
+
+        final Book book = Book.builder()
+            .id(bookId)
+            .chapters(List.of(
+                chapterBuilder.apply(chapters.get(chapter1), initialStatusChapter1),
+                chapterBuilder.apply(chapters.get(chapter2), initialStatusChapter2)))
+            .lines(lines)
+            .build();
+
+        Mockito
+            .when(this.bookRepositoryMock.findById(bookId))
+            .thenReturn(Mono.just(book));
+
+        Mockito
+            .when(this.bookRepositoryMock.update(Mockito.any()))
+            .thenAnswer(invocation ->
+                Mono.just(invocation.getArgument(0)));
+
+        this.bookService.toggleChapter(
+                bookId,
+                chapters.get(toggledChapterId),
+                askedStatus)
+            .as(StepVerifier::create)
+            .consumeNextWith(b -> {
+                assertThat(b).isNotNull();
+                assertChapter(b, chapters.get(chapter1), expectedStatusChapter1);
+                assertChapter(b, chapters.get(chapter2), expectedStatusChapter2);
+            })
+            .verifyComplete();
+    }
+
+    private void assertChapter(final Book book,
+                               final UUID chapterId,
+                               final boolean expectedStatus) {
+
+        final boolean actualStatus = book.getChapters()
+            .stream()
+            .filter(c -> c.getId().equals(chapterId))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Chapter not found"))
+            .isEnabled();
+
+        assertThat(actualStatus).isEqualTo(expectedStatus);
+
+        if (!expectedStatus) {
+            assertThat(book.getLines())
+                .extracting(Line::getChapterId)
+                .doesNotContain(chapterId);
+        }
+        // TODO When refresh is implemented, check that lines are refreshed
     }
 
 }

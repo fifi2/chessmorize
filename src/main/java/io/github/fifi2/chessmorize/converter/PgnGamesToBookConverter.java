@@ -103,6 +103,7 @@ public class PgnGamesToBookConverter {
                         .orElse(Map.of())
                         .get("Event"),
                     studyName))
+                .enabled(true)
                 .nextMoves(Optional
                     .ofNullable(pgnGame.getNodes())
                     .orElse(List.of())

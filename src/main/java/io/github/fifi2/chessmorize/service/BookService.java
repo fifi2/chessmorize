@@ -3,6 +3,7 @@ package io.github.fifi2.chessmorize.service;
 import io.github.fifi2.chessmorize.api.LichessApiClient;
 import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
+import io.github.fifi2.chessmorize.error.exception.ChapterNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Line;
@@ -146,6 +147,60 @@ public class BookService {
     }
 
     /**
+     * Enable or disable a chapter.
+     *
+     * @param bookId    The Book id.
+     * @param chapterId The id of the Chapter to disable.
+     * @param enabled   A boolean (true to enable, false to disable).
+     * @return A Mono of the updated Book.
+     */
+    public Mono<Book> toggleChapter(final UUID bookId,
+                                    final UUID chapterId,
+                                    final boolean enabled) {
+
+        return this.bookRepository.findById(bookId)
+            .doOnNext(book -> {
+                book.getChapters()
+                    .stream()
+                    .filter(chapter -> chapterId.equals(chapter.getId()))
+                    .findAny()
+                    .ifPresentOrElse(
+                        chapter -> chapter.setEnabled(enabled),
+                        () -> {
+                            throw new ChapterNotFoundException(bookId, chapterId);
+                        }
+                    );
+                if (!enabled) {
+                    // Purge lines of disabled chapter
+                    book.setLines(Optional
+                        .ofNullable(book.getLines())
+                        .orElse(List.of())
+                        .stream()
+                        .filter(line -> !chapterId.equals(line.getChapterId()))
+                        .toList());
+                } else {
+                    // Refresh lines if chapter is enabled
+                    // TODO Test and Integration test
+                    this.refreshLines(book);
+                }
+            })
+            .flatMap(this.bookRepository::update);
+    }
+
+    /**
+     * Refresh the lines of a Book.
+     *
+     * @param book is the Book to refresh lines for.
+     *             This method should be called when a chapter is enabled
+     *             to regenerate its lines.
+     */
+    void refreshLines(final Book book) {
+
+        // TODO + Test and Integration test
+        return;
+    }
+
+    /**
      * Do the PGN parsing of the Book from its study.
      *
      * @param pgn     is the study as a String (the PGN).
@@ -163,8 +218,10 @@ public class BookService {
         } catch (Exception e) {
             throw new PgnException(studyId, e);
         }
-        final long duration = Duration.between(start, Instant.now()).toMillis();
-        log.info("Parse PGN {} in {} ms", studyId, duration);
+        log.info(
+            "Parse PGN {} in {} ms",
+            studyId,
+            Duration.between(start, Instant.now()).toMillis());
         return pgnGames;
     }
 

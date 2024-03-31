@@ -4,6 +4,7 @@ import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.NoTrainingLineException;
 import io.github.fifi2.chessmorize.model.Book;
+import io.github.fifi2.chessmorize.model.Chapter;
 import io.github.fifi2.chessmorize.model.Line;
 import io.github.fifi2.chessmorize.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,9 +54,18 @@ public class TrainingService {
         final int currentCalendarSlot = book.getCalendarSlot();
         final List<Integer> currentBoxes = this.trainingProperties.getCalendar()
             .get(currentCalendarSlot);
+        final Set<UUID> disabledChapters = Optional
+            .ofNullable(book.getChapters())
+            .orElse(List.of())
+            .stream()
+            .filter(Predicate.not(Chapter::isEnabled))
+            .map(Chapter::getId)
+            .collect(Collectors.toSet());
 
         return book.getLines()
             .stream()
+            // filter chapters
+            .filter(line -> !disabledChapters.contains(line.getChapterId()))
             // filter lines related to the session boxes
             .filter(line -> currentBoxes.contains(line.getBoxId()))
             // filter lines that went back in box 0 during this training session

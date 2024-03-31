@@ -12,6 +12,7 @@ public class Chapter {
 
     private final UUID id;
     private final String title;
+    private boolean enabled;
     private final List<Move> nextMoves;
 
 }

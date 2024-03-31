@@ -12,6 +12,7 @@ public abstract class Constants {
         public static final String SET_RESULT = TRAINING + "/set-result";
         public static final String NEXT_CALENDAR_SLOT =
             TRAINING + "/next-calendar-slot";
+        public static final String TOGGLE_CHAPTER = BOOKS + "/toggle-chapter";
 
     }
 
@@ -36,6 +37,7 @@ public abstract class Constants {
         private static final String CHAPTER = CHAPTERS + IDX;
         public static final String CHAPTER_ID = CHAPTER + ".id";
         public static final String CHAPTER_TITLE = CHAPTER + ".title";
+        public static final String CHAPTER_ENABLED = CHAPTER + ".enabled";
         private static final String CHAPTER_MOVES = CHAPTER + ".nextMoves";
         public static final String CHAPTER_MOVES_SIZE = CHAPTER_MOVES + SIZE;
 

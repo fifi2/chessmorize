@@ -8,14 +8,14 @@ import java.util.UUID;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 @Getter
-public class LineNotFoundException extends RuntimeException {
+public class ChapterNotFoundException extends RuntimeException {
 
     private final String message;
 
-    public LineNotFoundException(final UUID bookId, final UUID lineId) {
+    public ChapterNotFoundException(final UUID bookId, final UUID chapterId) {
 
-        this.message = "Line %s not found in Book %s.".formatted(
-            lineId,
+        this.message = "Chapter %s not found in Book %s.".formatted(
+            chapterId,
             bookId);
     }
 

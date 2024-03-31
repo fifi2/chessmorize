@@ -18,7 +18,7 @@ public class TrainingProperties {
     private boolean shuffled;
 
     @NotNull
-    private List<List<Integer>> calendar;
+    private List<List<Integer>> calendar; // TODO: make boxes a Set<Integer>
 
     public Integer getMaxNumber() {
 

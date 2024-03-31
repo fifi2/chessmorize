@@ -2,6 +2,7 @@ package io.github.fifi2.chessmorize.it;
 
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.NextCalendarSlotRequest;
+import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.TrainingResultRequest;
 import io.github.fifi2.chessmorize.helper.AbstractLichessTest;
 import io.github.fifi2.chessmorize.helper.ObjectWrapper;
@@ -34,6 +35,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
 
         final String studyId = "study-id";
         final ObjectWrapper<UUID> bookId = new ObjectWrapper<>();
+        final ObjectWrapper<String> introChapter = new ObjectWrapper<>();
         final ObjectWrapper<String> shortChapter = new ObjectWrapper<>();
         final ObjectWrapper<String> karpovChapter = new ObjectWrapper<>();
         final ObjectWrapper<String> shortLine1 = new ObjectWrapper<>();
@@ -59,13 +61,18 @@ class TrainingIntegrationTest extends AbstractLichessTest {
         final Map<String, TrainingInstants> lastTraining = new HashMap<>();
 
         this.lichessMockResponse("""
+            [Event "TrainingIntegrationTest: Caro-Kann, Introduction"]
+            
+            1. e4 c6 { It's the Caro-Kann! } *
+            
+            
             [Event "TrainingIntegrationTest: Caro-Kann, Short variation"]
-
+            
             1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 { Short 1 } (4. Be2 { Short 2 } e6 5. Nf3) 4... e6 5. Be2 c5 *
-
-
+            
+            
             [Event "TrainingIntegrationTest: Caro-Kann, Karpov"]
-
+            
             1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nd7 { Karpov } *
             """);
 
@@ -98,71 +105,88 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
             .jsonPath(Json.NAME).isEqualTo("TrainingIntegrationTest")
             .jsonPath(Json.CALENDAR_SLOT).isEqualTo(0)
-            .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(2)
-            // chapter - Short variation
+            .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(3)
+            .jsonPath(Json.LINES_SIZE).isEqualTo(4)
+            // chapter - Introduction
             .jsonPath(Json.CHAPTER_ID, 0).isNotEmpty()
-            .jsonPath(Json.CHAPTER_ID, 0).value(id -> shortChapter.set(id.toString()))
-            .jsonPath(Json.CHAPTER_TITLE, 0).isEqualTo("Caro-Kann, Short variation")
+            .jsonPath(Json.CHAPTER_ID, 0).value(id -> introChapter.set(id.toString()))
+            .jsonPath(Json.CHAPTER_TITLE, 0).isEqualTo("Caro-Kann, Introduction")
             .jsonPath(Json.CHAPTER_MOVES_SIZE, 0).isEqualTo(1)
+            // chapter - Short variation
             .jsonPath(Json.CHAPTER_ID, 1).isNotEmpty()
-            .jsonPath(Json.CHAPTER_ID, 1).value(id -> karpovChapter.set(id.toString()))
-            .jsonPath(Json.CHAPTER_TITLE, 1).isEqualTo("Caro-Kann, Karpov")
-            .jsonPath(Json.CHAPTER_MOVES_SIZE, 0).isEqualTo(1)
-            .jsonPath(Json.LINES_SIZE).isEqualTo(3)
+            .jsonPath(Json.CHAPTER_ID, 1).value(id -> shortChapter.set(id.toString()))
+            .jsonPath(Json.CHAPTER_TITLE, 1).isEqualTo("Caro-Kann, Short variation")
+            .jsonPath(Json.CHAPTER_MOVES_SIZE, 1).isEqualTo(1)
+            // chapter - Karpov variation
+            .jsonPath(Json.CHAPTER_ID, 2).isNotEmpty()
+            .jsonPath(Json.CHAPTER_ID, 2).value(id -> karpovChapter.set(id.toString()))
+            .jsonPath(Json.CHAPTER_TITLE, 2).isEqualTo("Caro-Kann, Karpov")
+            .jsonPath(Json.CHAPTER_MOVES_SIZE, 2).isEqualTo(1)
             // line - Short variation
-            .jsonPath(Json.LINE_ID, 0).isNotEmpty()
-            .jsonPath(Json.LINE_ID, 0).value(id -> shortLine1.set(id.toString()))
-            .jsonPath(Json.LINE_CHAPTER_ID, 0).isEqualTo(shortChapter.get())
-            .jsonPath(Json.LINE_MOVES_SIZE, 0).isEqualTo(10)
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 0).isEqualTo("e2e4")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 1).isEqualTo("c7c6")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 2).isEqualTo("d2d4")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 3).isEqualTo("d7d5")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 4).isEqualTo("e4e5")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 5).isEqualTo("c8f5")
-            .jsonPath(Json.LINE_MOVE_COMMENT, 0, 6).isEqualTo("Short 1")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 6).isEqualTo("g1f3")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 7).isEqualTo("e7e6")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 8).isEqualTo("f1e2")
-            .jsonPath(Json.LINE_MOVE_UCI, 0, 9).isEqualTo("c6c5")
-            .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
-            .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()
-            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 0).isEmpty()
-            // line - Short variation, transposition
             .jsonPath(Json.LINE_ID, 1).isNotEmpty()
-            .jsonPath(Json.LINE_ID, 1).value(id -> shortLine2.set(id.toString()))
+            .jsonPath(Json.LINE_ID, 1).value(id -> shortLine1.set(id.toString()))
             .jsonPath(Json.LINE_CHAPTER_ID, 1).isEqualTo(shortChapter.get())
-            .jsonPath(Json.LINE_MOVES_SIZE, 1).isEqualTo(9)
+            .jsonPath(Json.LINE_MOVES_SIZE, 1).isEqualTo(10)
             .jsonPath(Json.LINE_MOVE_UCI, 1, 0).isEqualTo("e2e4")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 1).isEqualTo("c7c6")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 2).isEqualTo("d2d4")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 3).isEqualTo("d7d5")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 4).isEqualTo("e4e5")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 5).isEqualTo("c8f5")
-            .jsonPath(Json.LINE_MOVE_COMMENT, 1, 6).isEqualTo("Short 2")
-            .jsonPath(Json.LINE_MOVE_UCI, 1, 6).isEqualTo("f1e2")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 1, 6).isEqualTo("Short 1")
+            .jsonPath(Json.LINE_MOVE_UCI, 1, 6).isEqualTo("g1f3")
             .jsonPath(Json.LINE_MOVE_UCI, 1, 7).isEqualTo("e7e6")
-            .jsonPath(Json.LINE_MOVE_UCI, 1, 8).isEqualTo("g1f3")
+            .jsonPath(Json.LINE_MOVE_UCI, 1, 8).isEqualTo("f1e2")
+            .jsonPath(Json.LINE_MOVE_UCI, 1, 9).isEqualTo("c6c5")
             .jsonPath(Json.LINE_BOX_ID, 1).isEqualTo(0)
             .jsonPath(Json.LINE_LAST_TRAINING, 1).isEmpty()
             .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 1).isEmpty()
-            // chapter - Karpov
+            // line - Short variation, transposition
             .jsonPath(Json.LINE_ID, 2).isNotEmpty()
-            .jsonPath(Json.LINE_ID, 2).value(id -> karpovLine.set(id.toString()))
-            .jsonPath(Json.LINE_CHAPTER_ID, 2).isEqualTo(karpovChapter.get())
-            .jsonPath(Json.LINE_MOVES_SIZE, 2).isEqualTo(8)
+            .jsonPath(Json.LINE_ID, 2).value(id -> shortLine2.set(id.toString()))
+            .jsonPath(Json.LINE_CHAPTER_ID, 2).isEqualTo(shortChapter.get())
+            .jsonPath(Json.LINE_MOVES_SIZE, 2).isEqualTo(9)
             .jsonPath(Json.LINE_MOVE_UCI, 2, 0).isEqualTo("e2e4")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 1).isEqualTo("c7c6")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 2).isEqualTo("d2d4")
             .jsonPath(Json.LINE_MOVE_UCI, 2, 3).isEqualTo("d7d5")
-            .jsonPath(Json.LINE_MOVE_UCI, 2, 4).isEqualTo("b1c3")
-            .jsonPath(Json.LINE_MOVE_UCI, 2, 5).isEqualTo("d5e4")
-            .jsonPath(Json.LINE_MOVE_UCI, 2, 6).isEqualTo("c3e4")
-            .jsonPath(Json.LINE_MOVE_COMMENT, 2, 7).isEqualTo("Karpov")
-            .jsonPath(Json.LINE_MOVE_UCI, 2, 7).isEqualTo("b8d7")
+            .jsonPath(Json.LINE_MOVE_UCI, 2, 4).isEqualTo("e4e5")
+            .jsonPath(Json.LINE_MOVE_UCI, 2, 5).isEqualTo("c8f5")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 2, 6).isEqualTo("Short 2")
+            .jsonPath(Json.LINE_MOVE_UCI, 2, 6).isEqualTo("f1e2")
+            .jsonPath(Json.LINE_MOVE_UCI, 2, 7).isEqualTo("e7e6")
+            .jsonPath(Json.LINE_MOVE_UCI, 2, 8).isEqualTo("g1f3")
             .jsonPath(Json.LINE_BOX_ID, 2).isEqualTo(0)
             .jsonPath(Json.LINE_LAST_TRAINING, 2).isEmpty()
-            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 2).isEmpty());
+            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 2).isEmpty()
+            // line - Karpov
+            .jsonPath(Json.LINE_ID, 3).isNotEmpty()
+            .jsonPath(Json.LINE_ID, 3).value(id -> karpovLine.set(id.toString()))
+            .jsonPath(Json.LINE_CHAPTER_ID, 3).isEqualTo(karpovChapter.get())
+            .jsonPath(Json.LINE_MOVES_SIZE, 3).isEqualTo(8)
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 0).isEqualTo("e2e4")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 1).isEqualTo("c7c6")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 2).isEqualTo("d2d4")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 3).isEqualTo("d7d5")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 4).isEqualTo("b1c3")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 5).isEqualTo("d5e4")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 6).isEqualTo("c3e4")
+            .jsonPath(Json.LINE_MOVE_COMMENT, 3, 7).isEqualTo("Karpov")
+            .jsonPath(Json.LINE_MOVE_UCI, 3, 7).isEqualTo("b8d7")
+            .jsonPath(Json.LINE_BOX_ID, 3).isEqualTo(0)
+            .jsonPath(Json.LINE_LAST_TRAINING, 3).isEmpty()
+            .jsonPath(Json.LINE_LAST_CALENDAR_SLOT, 3).isEmpty());
+
+        // toggle chapter introduction
+        this.webTestClient.put()
+            .uri(Api.TOGGLE_CHAPTER)
+            .bodyValue(ToggleChapterRequest.builder()
+                .bookId(bookId.get())
+                .chapterId(UUID.fromString(introChapter.get()))
+                .enabled(false)
+                .build())
+            .exchange()
+            .expectStatus().isNoContent();
 
         this.runAndAssertNextLine(
             bookId.get(),

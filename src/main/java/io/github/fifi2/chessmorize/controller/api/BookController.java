@@ -2,6 +2,7 @@ package io.github.fifi2.chessmorize.controller.api;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
+import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.service.BookService;
 import jakarta.validation.Valid;
@@ -66,6 +67,19 @@ public class BookController extends AbstractController {
         @Autowired final ServerHttpRequest request) {
 
         return this.bookService.deleteOneBook(bookId)
+            .map(dummy -> ResponseEntity.noContent().<Void>build())
+            .doOnError(e -> logError(request, e));
+    }
+
+    @PutMapping(path = "/toggle-chapter")
+    public Mono<ResponseEntity<Void>> toggleChapter(
+        @RequestBody @Valid @NotNull final ToggleChapterRequest requestBody,
+        @Autowired final ServerHttpRequest request) {
+
+        return this.bookService.toggleChapter(
+                requestBody.getBookId(),
+                requestBody.getChapterId(),
+                requestBody.getEnabled())
             .map(dummy -> ResponseEntity.noContent().<Void>build())
             .doOnError(e -> logError(request, e));
     }

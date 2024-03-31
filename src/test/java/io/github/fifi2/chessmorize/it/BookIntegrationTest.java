@@ -1,6 +1,7 @@
 package io.github.fifi2.chessmorize.it;
 
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
+import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.helper.AbstractLichessTest;
 import io.github.fifi2.chessmorize.helper.ObjectWrapper;
 import io.github.fifi2.chessmorize.helper.converter.StringToList;
@@ -14,6 +15,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static io.github.fifi2.chessmorize.helper.Constants.Api;
@@ -40,7 +42,7 @@ class BookIntegrationTest extends AbstractLichessTest {
 
         this.lichessMockResponse("""
             [Event "White: Queen's gambit"]
-                        
+
             1. d4 { Queen's opening } d5 2. c4 *
             """);
 
@@ -192,6 +194,82 @@ class BookIntegrationTest extends AbstractLichessTest {
                 .expectBody()
                 .jsonPath(Json.ID, bookId.get());
         }
+    }
+
+    @Test
+    void bookApi_toggleChapter() {
+
+        final String studyId = "study-id";
+        final ObjectWrapper<String> bookId = new ObjectWrapper<>();
+        final ObjectWrapper<String> chapterId1 = new ObjectWrapper<>();
+        final ObjectWrapper<String> chapterId2 = new ObjectWrapper<>();
+
+        this.lichessMockResponse("""
+            [Event "White: Queen's gambit - Introduction"]
+
+            1. d4 { Queen's opening } d5 2. c4 *
+
+
+            [Event "White: Queen's gambit - 1st real chapter"]
+            
+            1. d4 { Queen's opening } d5 2. c4 dxc4 { Exchange variation } 3. Nf3 *
+            """);
+
+        // create a book
+        this.webTestClient
+            .post()
+            .uri(Api.BOOKS)
+            .bodyValue(BookCreationRequest.builder()
+                .studyId(studyId)
+                .build())
+            .exchange()
+            .expectStatus().isCreated()
+            .expectBody()
+            .jsonPath(Json.ID).value(id -> bookId.set(id.toString()))
+            .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
+            .jsonPath(Json.NAME).isEqualTo("White")
+            .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(2)
+            .jsonPath(Json.CHAPTER_ID, 0).isNotEmpty()
+            .jsonPath(Json.CHAPTER_ID, 0).value(id -> chapterId1.set(id.toString()))
+            .jsonPath(Json.CHAPTER_TITLE, 0).isEqualTo("Queen's gambit - Introduction")
+            .jsonPath(Json.CHAPTER_ENABLED, 0).isEqualTo("true")
+            .jsonPath(Json.CHAPTER_ID, 1).isNotEmpty()
+            .jsonPath(Json.CHAPTER_ID, 1).value(id -> chapterId2.set(id.toString()))
+            .jsonPath(Json.CHAPTER_TITLE, 1).isEqualTo("Queen's gambit - 1st real chapter")
+            .jsonPath(Json.CHAPTER_ENABLED, 1).isEqualTo("true")
+            .jsonPath(Json.LINES_SIZE).isEqualTo(2);
+
+        // toggle the first chapter
+        this.webTestClient
+            .put()
+            .uri(Api.TOGGLE_CHAPTER)
+            .bodyValue(ToggleChapterRequest.builder()
+                .bookId(UUID.fromString(bookId.get()))
+                .chapterId(UUID.fromString(chapterId1.get()))
+                .enabled(false)
+                .build())
+            .exchange()
+            .expectStatus().isNoContent()
+            .expectBody().isEmpty();
+
+        // assert the first chapter is disabled
+        this.webTestClient
+            .get()
+            .uri(Api.BOOK, bookId.get())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath(Json.ID).isEqualTo(bookId.get())
+            .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
+            .jsonPath(Json.NAME).isEqualTo("White")
+            .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(2)
+            .jsonPath(Json.CHAPTER_ID, 0).isEqualTo(chapterId1.get())
+            .jsonPath(Json.CHAPTER_TITLE, 0).isEqualTo("Queen's gambit - Introduction")
+            .jsonPath(Json.CHAPTER_ENABLED, 0).isEqualTo("false")
+            .jsonPath(Json.CHAPTER_ID, 1).isEqualTo(chapterId2.get())
+            .jsonPath(Json.CHAPTER_TITLE, 1).isEqualTo("Queen's gambit - 1st real chapter")
+            .jsonPath(Json.CHAPTER_ENABLED, 1).isEqualTo("true")
+            .jsonPath(Json.LINES_SIZE).isEqualTo(1);
     }
 
 }

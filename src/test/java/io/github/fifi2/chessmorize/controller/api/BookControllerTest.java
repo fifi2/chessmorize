@@ -1,6 +1,7 @@
 package io.github.fifi2.chessmorize.controller.api;
 
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
+import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.BookSerDeException;
 import io.github.fifi2.chessmorize.error.exception.lichess.Lichess5xxException;
@@ -149,7 +150,7 @@ class BookControllerTest extends AbstractSpringBootTest {
 
         return Stream.of(
             Arguments.of(
-                new BookSerDeException("Json deserialization failture", null),
+                new BookSerDeException("Json deserialization failure", null),
                 HttpStatus.INTERNAL_SERVER_ERROR),
             Arguments.of(
                 new BookNotFoundException(UUID.randomUUID()),
@@ -207,6 +208,36 @@ class BookControllerTest extends AbstractSpringBootTest {
         this.webTestClient
             .delete()
             .uri(Api.BOOK, bookId)
+            .exchange()
+            .expectStatus().isEqualTo(expectedStatus);
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', textBlock = """
+        true  | NO_CONTENT
+        false | NOT_FOUND
+        """)
+    void toggleChapter(final boolean isToggleOk,
+                       final HttpStatus expectedStatus) {
+
+        final UUID bookId = UUID.randomUUID();
+        final UUID chapterId = UUID.randomUUID();
+        final boolean enabled = true;
+
+        Mockito
+            .when(this.bookService.toggleChapter(bookId, chapterId, enabled))
+            .thenReturn(isToggleOk
+                ? Mono.just(Book.builder().id(bookId).build())
+                : Mono.error(new BookNotFoundException(bookId)));
+
+        this.webTestClient
+            .put()
+            .uri(Api.TOGGLE_CHAPTER)
+            .bodyValue(ToggleChapterRequest.builder()
+                .bookId(bookId)
+                .chapterId(chapterId)
+                .enabled(enabled)
+                .build())
             .exchange()
             .expectStatus().isEqualTo(expectedStatus);
     }
