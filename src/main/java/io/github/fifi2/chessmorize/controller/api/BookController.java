@@ -1,9 +1,9 @@
 package io.github.fifi2.chessmorize.controller.api;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.service.BookService;
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping(
-    path = "/api/book",
+    path = "/api/books",
     produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class BookController extends AbstractController {
@@ -34,7 +34,7 @@ public class BookController extends AbstractController {
 
         return this.bookService.createBook(requestBody.getStudyId())
             .map(book -> ResponseEntity
-                .created(URI.create("/api/book/" + book.getId()))
+                .created(URI.create("/api/books/" + book.getId()))
                 .body(book))
             .doOnError(e -> logError(request, e));
     }
@@ -61,12 +61,12 @@ public class BookController extends AbstractController {
     }
 
     @DeleteMapping(path = "/{bookId}")
-    public Mono<ResponseEntity<Object>> deleteBook(
+    public Mono<ResponseEntity<Void>> deleteBook(
         @PathVariable @NotNull final UUID bookId,
         @Autowired final ServerHttpRequest request) {
 
         return this.bookService.deleteOneBook(bookId)
-            .map(dummy -> ResponseEntity.noContent().build())
+            .map(dummy -> ResponseEntity.noContent().<Void>build())
             .doOnError(e -> logError(request, e));
     }
 

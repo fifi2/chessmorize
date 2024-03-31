@@ -14,15 +14,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Validated
-public class TrainingResultRequest {
+public class NextCalendarSlotRequest {
 
     @NotNull
     private UUID bookId;
-
-    @NotNull
-    private UUID lineId;
-
-    @NotNull
-    private Boolean result;
 
 }

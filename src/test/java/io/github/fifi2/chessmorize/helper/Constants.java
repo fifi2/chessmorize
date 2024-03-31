@@ -3,13 +3,16 @@ package io.github.fifi2.chessmorize.helper;
 public abstract class Constants {
 
     public abstract static class Api {
+
         private static final String API = "/api";
-        public static final String BOOKS = API + "/book";
+        public static final String BOOKS = API + "/books";
         public static final String BOOK = BOOKS + "/{bookId}";
-        private static final String TRAINING = API + "/training/book/{bookId}";
+        private static final String TRAINING = API + "/training";
+        public static final String NEXT_LINE = TRAINING + "/next-line/{bookId}";
         public static final String SET_RESULT = TRAINING + "/set-result";
-        public static final String NEXT_LINE = TRAINING + "/next-line";
-        public static final String NEXT_SLOT = TRAINING + "/next-slot";
+        public static final String NEXT_CALENDAR_SLOT =
+            TRAINING + "/next-calendar-slot";
+
     }
 
     public abstract static class Json {
