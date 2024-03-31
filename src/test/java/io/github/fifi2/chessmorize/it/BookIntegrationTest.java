@@ -120,7 +120,7 @@ class BookIntegrationTest extends AbstractLichessTest {
             .jsonPath("$").isArray()
             .jsonPath("$.length()").isEqualTo(1)
             .jsonPath("$.[0].id").isEqualTo(bookId.get())
-            .jsonPath("$.[0].studyId").isEqualTo(studyId)
+            .jsonPath("$.[0].studyId").doesNotExist()
             .jsonPath("$.[0].name").isEqualTo("White")
             .jsonPath("$.[0].chapters").doesNotExist()
             .jsonPath("$.[0].lines").doesNotExist();

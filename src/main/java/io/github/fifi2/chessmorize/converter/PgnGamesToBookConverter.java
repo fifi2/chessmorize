@@ -124,12 +124,16 @@ public class PgnGamesToBookConverter {
     String cleanChapterName(final String chapterName,
                             final String studyName) {
 
+        final String studyNamePattern = Optional
+            .ofNullable(studyName)
+            .map(Pattern::quote)
+            .map(pattern -> "^" + pattern + "\\s*:\\s*")
+            .orElse("");
+
         return Optional
             .ofNullable(chapterName)
             .orElse("")
-            .replaceFirst(
-                "^" + Pattern.quote(studyName) + "\\s*:\\s*",
-                "");
+            .replaceFirst(studyNamePattern, "");
     }
 
     /**
