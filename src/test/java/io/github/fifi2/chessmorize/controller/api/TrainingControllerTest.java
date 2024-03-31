@@ -1,5 +1,6 @@
 package io.github.fifi2.chessmorize.controller.api;
 
+import io.github.fifi2.chessmorize.controller.api.dto.NextCalendarSlotRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.TrainingResultRequest;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
@@ -32,7 +33,7 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
-    void getNextLine(final boolean isLineFound) {
+    void nextLine(final boolean isLineFound) {
 
         final UUID bookId = UUID.randomUUID();
 
@@ -54,7 +55,7 @@ class TrainingControllerTest extends AbstractSpringBootTest {
     }
 
     @Test
-    void getNextLine_withBadInput() {
+    void nextLine_withBadInput() {
 
         this.webTestClient
             .get()
@@ -64,7 +65,7 @@ class TrainingControllerTest extends AbstractSpringBootTest {
     }
 
     @Test
-    void setLineResult() {
+    void setResult() {
 
         Mockito
             .when(this.trainingService.setLineResult(
@@ -76,8 +77,9 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, UUID.randomUUID())
+            .uri(Api.SET_RESULT)
             .bodyValue(TrainingResultRequest.builder()
+                .bookId(UUID.randomUUID())
                 .lineId(UUID.randomUUID())
                 .result(true)
                 .build())
@@ -86,11 +88,11 @@ class TrainingControllerTest extends AbstractSpringBootTest {
     }
 
     @Test
-    void setLineResult_withNoInput() {
+    void setResult_withoutInput() {
 
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, UUID.randomUUID())
+            .uri(Api.SET_RESULT)
             .exchange()
             .expectStatus().isBadRequest();
     }
@@ -99,17 +101,18 @@ class TrainingControllerTest extends AbstractSpringBootTest {
     @CsvSource(delimiter = '|', textBlock = """
         true  | true  | false
         true  | false | true
+        true  | true  | false
         false | true  | true
         false | false | false
+        false | false | true
         """)
-    void setLineResult_withBadInput(final boolean bookIdStatus,
-                                    final boolean lineIdStatus,
-                                    final boolean resultStatus) {
+    void setResult_withBadInput(final boolean bookIdStatus,
+                                final boolean lineIdStatus,
+                                final boolean resultStatus) {
 
         final TrainingResultRequest request = TrainingResultRequest.builder()
-            .lineId(lineIdStatus
-                ? UUID.randomUUID()
-                : null)
+            .bookId(bookIdStatus ? UUID.randomUUID() : null)
+            .lineId(lineIdStatus ? UUID.randomUUID() : null)
             .build();
 
         if (resultStatus)
@@ -117,16 +120,14 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, bookIdStatus
-                ? UUID.randomUUID()
-                : "bad")
+            .uri(Api.SET_RESULT)
             .bodyValue(request)
             .exchange()
             .expectStatus().isBadRequest();
     }
 
     @Test
-    void setLineResult_withNoBookFound() {
+    void setResult_withNoBookFound() {
 
         final UUID bookId = UUID.randomUUID();
 
@@ -139,8 +140,9 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, bookId)
+            .uri(Api.SET_RESULT)
             .bodyValue(TrainingResultRequest.builder()
+                .bookId(bookId)
                 .lineId(UUID.randomUUID())
                 .result(true)
                 .build())
@@ -149,7 +151,7 @@ class TrainingControllerTest extends AbstractSpringBootTest {
     }
 
     @Test
-    void setLineResult_withNoLineFound() {
+    void setResult_withNoLineFound() {
 
         final UUID bookId = UUID.randomUUID();
         final UUID lineId = UUID.randomUUID();
@@ -163,8 +165,9 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, bookId)
+            .uri(Api.SET_RESULT)
             .bodyValue(TrainingResultRequest.builder()
+                .bookId(bookId)
                 .lineId(lineId)
                 .result(true)
                 .build())
@@ -186,7 +189,10 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         final WebTestClient.ResponseSpec postExchange = this.webTestClient
             .post()
-            .uri(Api.NEXT_SLOT, bookId)
+            .uri(Api.NEXT_CALENDAR_SLOT)
+            .bodyValue(NextCalendarSlotRequest.builder()
+                .bookId(bookId)
+                .build())
             .exchange();
 
         if (isBookFound)
@@ -200,7 +206,7 @@ class TrainingControllerTest extends AbstractSpringBootTest {
 
         this.webTestClient
             .post()
-            .uri(Api.NEXT_SLOT, "bad")
+            .uri(Api.NEXT_CALENDAR_SLOT)
             .exchange()
             .expectStatus().isBadRequest();
     }

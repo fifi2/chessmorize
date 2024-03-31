@@ -1,6 +1,7 @@
 package io.github.fifi2.chessmorize.it;
 
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
+import io.github.fifi2.chessmorize.controller.api.dto.NextCalendarSlotRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.TrainingResultRequest;
 import io.github.fifi2.chessmorize.helper.AbstractLichessTest;
 import io.github.fifi2.chessmorize.helper.ObjectWrapper;
@@ -32,7 +33,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
     void trainingApi_nominal() {
 
         final String studyId = "study-id";
-        final ObjectWrapper<String> bookId = new ObjectWrapper<>();
+        final ObjectWrapper<UUID> bookId = new ObjectWrapper<>();
         final ObjectWrapper<String> shortChapter = new ObjectWrapper<>();
         final ObjectWrapper<String> karpovChapter = new ObjectWrapper<>();
         final ObjectWrapper<String> shortLine1 = new ObjectWrapper<>();
@@ -79,7 +80,8 @@ class TrainingIntegrationTest extends AbstractLichessTest {
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
-                .jsonPath(Json.ID).value(id -> bookId.set(id.toString()));
+                .jsonPath(Json.ID).value(id ->
+                    bookId.set(UUID.fromString(id.toString())));
 
         // get the book
         final WebTestClient.BodyContentSpec getBody =
@@ -89,7 +91,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath(Json.ID).isEqualTo(bookId.get());
+                .jsonPath(Json.ID).isEqualTo(bookId.get().toString());
 
         // assert POST and GET responses
         Stream.of(postBody, getBody).forEach(body -> body
@@ -209,7 +211,10 @@ class TrainingIntegrationTest extends AbstractLichessTest {
 
         this.webTestClient
             .post()
-            .uri(Api.NEXT_SLOT, bookId.get())
+            .uri(Api.NEXT_CALENDAR_SLOT)
+            .bodyValue(NextCalendarSlotRequest.builder()
+                .bookId(bookId.get())
+                .build())
             .exchange()
             .expectStatus().isOk()
             .expectBody().isEmpty();
@@ -233,7 +238,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
             lastTraining.get(shortLine1.get()));
     }
 
-    private void runAndAssertNextLine(final String bookId,
+    private void runAndAssertNextLine(final UUID bookId,
                                       final String expectedLineId,
                                       final String expectedChapterId,
                                       final List<String> expectedUcis,
@@ -270,7 +275,7 @@ class TrainingIntegrationTest extends AbstractLichessTest {
     }
 
     private TrainingInstants runAndAssertSetResult(
-        final String bookId,
+        final UUID bookId,
         final String lineId,
         final boolean result,
         final String expectedChapterId,
@@ -280,8 +285,9 @@ class TrainingIntegrationTest extends AbstractLichessTest {
         final Instant beforeSettingResult = Instant.now();
         this.webTestClient
             .post()
-            .uri(Api.SET_RESULT, bookId)
+            .uri(Api.SET_RESULT)
             .bodyValue(TrainingResultRequest.builder()
+                .bookId(bookId)
                 .lineId(UUID.fromString(lineId))
                 .result(result)
                 .build())
