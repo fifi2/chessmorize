@@ -8,7 +8,7 @@ import io.github.fifi2.chessmorize.error.exception.lichess.Lichess5xxException;
 import io.github.fifi2.chessmorize.error.exception.lichess.LichessNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.lichess.LichessTimeoutException;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
-import io.github.fifi2.chessmorize.helper.AbstractSpringBootTest;
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.service.BookService;
 import org.junit.jupiter.api.DisplayName;

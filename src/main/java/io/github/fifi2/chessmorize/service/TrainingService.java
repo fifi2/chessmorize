@@ -93,6 +93,7 @@ public class TrainingService {
                                     final UUID lineId,
                                     final boolean result) {
 
+        // TODO Check that lineId is indeed the next line to train?
         return this.bookRepository.findById(bookId)
             .flatMap(book -> {
                 final Optional<Line> optionalLine = book.getLines()

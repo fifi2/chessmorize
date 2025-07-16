@@ -146,7 +146,7 @@ public class BookRepository {
      *
      * @return A Mono of Boolean as the query success status.
      */
-    Mono<Boolean> deleteAll() {
+    public Mono<Boolean> deleteAll() {
 
         return this.databaseClient
             .sql(DELETE_ALL_BOOKS)

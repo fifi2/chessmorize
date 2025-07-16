@@ -14,8 +14,8 @@ import java.util.UUID;
 @Builder
 public class Line {
 
-    private final UUID id;
-    private final UUID chapterId;
+    private UUID id;
+    private UUID chapterId;
     private final List<LineMove> moves;
     private int boxId;
     private Instant lastTraining;

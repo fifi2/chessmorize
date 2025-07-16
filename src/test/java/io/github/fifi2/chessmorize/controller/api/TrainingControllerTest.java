@@ -5,7 +5,7 @@ import io.github.fifi2.chessmorize.controller.api.dto.TrainingResultRequest;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.NoTrainingLineException;
-import io.github.fifi2.chessmorize.helper.AbstractSpringBootTest;
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Line;
 import io.github.fifi2.chessmorize.service.TrainingService;

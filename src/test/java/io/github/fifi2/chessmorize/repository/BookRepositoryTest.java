@@ -1,12 +1,11 @@
 package io.github.fifi2.chessmorize.repository;
 
-import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
-import io.github.fifi2.chessmorize.error.exception.BookSerDeException;
-import io.github.fifi2.chessmorize.helper.AbstractSpringBootTest;
-import io.github.fifi2.chessmorize.model.Book;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.fifi2.chessmorize.repository.BookRepository;
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
+import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
+import io.github.fifi2.chessmorize.error.exception.BookSerDeException;
+import io.github.fifi2.chessmorize.model.Book;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

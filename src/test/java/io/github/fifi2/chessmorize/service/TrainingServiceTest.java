@@ -4,6 +4,7 @@ import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.LineNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.NoTrainingLineException;
+import io.github.fifi2.chessmorize.helper.builder.BookBuilder;
 import io.github.fifi2.chessmorize.helper.converter.StringToList;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Line;
@@ -46,20 +47,15 @@ class TrainingServiceTest {
     void getNextLine(final int eligibleLinesNumber) {
 
         final UUID bookId = UUID.randomUUID();
+        final BookBuilder bookBuilder = BookBuilder.builder()
+            .calendarSlot(0);
 
-        final List<Line> lines = new ArrayList<>();
-        for (int i = 0; i < eligibleLinesNumber; i++) {
-            lines.add(Line.builder()
-                .boxId(0)
-                .build());
-        }
+        for (int i = 0; i < eligibleLinesNumber; i++)
+            bookBuilder.withLine(line -> line.boxId(0));
 
         Mockito
             .when(this.bookRepository.findById(bookId))
-            .thenReturn(Mono.just(Book.builder()
-                .calendarSlot(0)
-                .lines(lines)
-                .build()));
+            .thenReturn(Mono.just(bookBuilder.build()));
 
         Mockito
             .when(this.trainingProperties.getCalendar())
@@ -124,8 +120,7 @@ class TrainingServiceTest {
                             ? null
                             : Integer.parseInt(s[3]))
                         .build();
-                }
-            ));
+                }));
 
         final Optional<Line> line = this.trainingService
             .pickNextLine(Book.builder()
@@ -147,11 +142,9 @@ class TrainingServiceTest {
         final Instant start = Instant.now();
         final UUID bookId = UUID.randomUUID();
         final UUID lineId = UUID.randomUUID();
-        final Book book = Book.builder()
+        final Book book = BookBuilder.builder()
             .id(bookId)
-            .lines(List.of(Line.builder()
-                .id(lineId)
-                .build()))
+            .withLine(line -> line.id(lineId))
             .build();
 
         Mockito
@@ -174,8 +167,8 @@ class TrainingServiceTest {
                 result))
             .expectNextMatches(line -> line.getBoxId() == (result ? 1 : 0)
                 && line.getLastTraining() != null
-                && line.getLastTraining().compareTo(start) >= 0
-                && line.getLastTraining().compareTo(Instant.now()) <= 0
+                && line.getLastTraining().isAfter(start)
+                && line.getLastTraining().isBefore(Instant.now())
                 && line.getLastCalendarSlot() == 0)
             .verifyComplete();
     }
@@ -191,7 +184,8 @@ class TrainingServiceTest {
             .thenReturn(Mono.error(new BookNotFoundException(bookId)));
 
         StepVerifier
-            .create(this.trainingService.setLineResult(bookId,
+            .create(this.trainingService.setLineResult(
+                bookId,
                 UUID.randomUUID(),
                 result))
             .expectError(BookNotFoundException.class)
@@ -213,11 +207,12 @@ class TrainingServiceTest {
             .build();
 
         Mockito
-            .when(this.bookRepository.findById(book.getId()))
+            .when(this.bookRepository.findById(bookId))
             .thenReturn(Mono.just(book));
 
         StepVerifier
-            .create(this.trainingService.setLineResult(bookId,
+            .create(this.trainingService.setLineResult(
+                bookId,
                 UUID.randomUUID(),
                 result))
             .expectError(LineNotFoundException.class)

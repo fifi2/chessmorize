@@ -13,14 +13,14 @@ import java.util.UUID;
 public class Book {
 
     @JsonView(Views.BookList.class)
-    private final UUID id;
+    private UUID id;
 
-    private final String studyId;
+    private String studyId;
 
     @JsonView(Views.BookList.class)
-    private final String name;
+    private String name;
 
-    private final List<Chapter> chapters;
+    private List<Chapter> chapters;
 
     private List<Line> lines;
 

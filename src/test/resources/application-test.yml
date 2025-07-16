@@ -8,3 +8,5 @@ resilience4j.retry.configs.default:
 chessmorize:
   lichess:
     url: http://localhost:8081/lichess
+  training:
+    shuffled: false

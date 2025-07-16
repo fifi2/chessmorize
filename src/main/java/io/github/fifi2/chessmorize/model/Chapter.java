@@ -10,8 +10,8 @@ import java.util.UUID;
 @Builder
 public class Chapter {
 
-    private final UUID id;
-    private final String title;
+    private UUID id;
+    private String title;
     private boolean enabled;
     private final List<Move> nextMoves;
 

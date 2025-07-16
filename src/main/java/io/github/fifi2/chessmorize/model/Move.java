@@ -1,6 +1,5 @@
 package io.github.fifi2.chessmorize.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,17 +10,11 @@ import java.util.UUID;
 @Builder
 public class Move {
 
-    private final UUID id;
-    private final String san;
-    private final String uci;
-    private final Nag nag;
-    private final String comment;
+    private UUID id;
+    private String san;
+    private String uci;
+    private Nag nag;
+    private String comment;
     private final List<Move> nextMoves;
-
-    @JsonIgnore
-    public Move getNext() {
-
-        return this.nextMoves.getFirst();
-    }
 
 }

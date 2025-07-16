@@ -1,6 +1,6 @@
 package io.github.fifi2.chessmorize.config.properties;
 
-import io.github.fifi2.chessmorize.helper.AbstractSpringBootTest;
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
