@@ -307,6 +307,19 @@ class BookApiTest extends AbstractSpringBootTest {
     }
 
     @Test
+    void getAllBooks_withNoBook() {
+
+        this.cleanDatabase();
+
+        this.webTestClient
+                .get()
+                .uri(Api.BOOKS)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+    }
+
+    @Test
     void getAllBooks() {
 
         final UUID book1Id = UUID.randomUUID();

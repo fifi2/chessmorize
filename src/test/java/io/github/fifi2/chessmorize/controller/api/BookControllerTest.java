@@ -175,18 +175,36 @@ class BookControllerTest extends AbstractSpringBootTest {
             .expectStatus().isEqualTo(expectedStatus);
     }
 
-    @Test
-    void getAllBooks() {
+    private static Stream<Arguments> getAllBooks() {
+
+        return Stream.of(
+            Arguments.of(
+                Flux.just(Book.builder().build()),
+                HttpStatus.OK),
+            Arguments.of(
+                Flux.empty(),
+                HttpStatus.NO_CONTENT));
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    void getAllBooks(final Flux<Book> bookFlux,
+                     final HttpStatus expectedStatus) {
 
         Mockito
             .when(this.bookService.getAllBooks())
-            .thenReturn(Flux.just(Book.builder().build()));
+            .thenReturn(bookFlux);
 
-        this.webTestClient
+        WebTestClient.ResponseSpec exchange = this.webTestClient
             .get()
             .uri(Api.BOOKS)
-            .exchange()
-            .expectStatus().isOk();
+            .exchange();
+
+        if (expectedStatus == HttpStatus.OK)
+            exchange.expectStatus().isOk();
+
+        if (expectedStatus == HttpStatus.NO_CONTENT)
+            exchange.expectStatus().isNoContent();
     }
 
     @ParameterizedTest
