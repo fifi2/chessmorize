@@ -2,6 +2,7 @@ package io.github.fifi2.chessmorize.helper.builder;
 
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Chapter;
+import io.github.fifi2.chessmorize.model.Color;
 import io.github.fifi2.chessmorize.model.Line;
 
 import java.util.ArrayList;
@@ -9,8 +10,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class BookBuilder {
-
-    // TODO Delete unused code here and in other builder classes
 
     private Book book;
 
@@ -41,6 +40,12 @@ public class BookBuilder {
     public BookBuilder name(final String name) {
 
         this.book.setName(name);
+        return this;
+    }
+
+    public BookBuilder color(final Color color) {
+
+        this.book.setColor(color);
         return this;
     }
 

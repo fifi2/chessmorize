@@ -45,7 +45,9 @@ public class BookController extends AbstractController {
         @RequestBody @Valid @NotNull final BookCreationRequest requestBody,
         @Autowired final ServerHttpRequest request) {
 
-        return this.bookService.createBook(requestBody.getStudyId())
+        return this.bookService.createBook(
+                requestBody.getStudyId(),
+                requestBody.getColor())
             .map(book -> ResponseEntity
                 .created(URI.create("/api/books/" + book.getId()))
                 .body(book))
@@ -86,6 +88,7 @@ public class BookController extends AbstractController {
             .map(book -> BookLight.builder()
                 .id(book.getId())
                 .name(book.getName())
+                .color(book.getColor())
                 .build())
             .collectList()
             .map(list -> list.isEmpty()

@@ -10,6 +10,7 @@ import io.github.fifi2.chessmorize.helper.builder.BookBuilder;
 import io.github.fifi2.chessmorize.helper.converter.StringToList;
 import io.github.fifi2.chessmorize.model.Book;
 import io.github.fifi2.chessmorize.model.Chapter;
+import io.github.fifi2.chessmorize.model.Color;
 import io.github.fifi2.chessmorize.model.Line;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,7 @@ class BookApiTest extends AbstractSpringBootTest {
             .uri(Api.BOOKS)
             .bodyValue(BookCreationRequest.builder()
                 .studyId(studyId)
+                .color(Color.WHITE)
                 .build())
             .exchange()
             .expectStatus().isCreated()
@@ -69,6 +71,7 @@ class BookApiTest extends AbstractSpringBootTest {
                     .doesNotThrowAnyException())
             .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
             .jsonPath(Json.NAME).isEqualTo("White")
+            .jsonPath(Json.COLOR).isEqualTo(Color.WHITE.name())
             .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(1)
             .jsonPath(Json.CHAPTER_ID, 0).isNotEmpty()
             .jsonPath(Json.CHAPTER_ID, 0).value(id -> chapterId.set(id.toString()))
@@ -143,6 +146,7 @@ class BookApiTest extends AbstractSpringBootTest {
             .uri(Api.BOOKS)
             .bodyValue(BookCreationRequest.builder()
                 .studyId(studyId)
+                .color(Color.BLACK)
                 .build())
             .exchange()
             .expectStatus().isEqualTo(expectedStatus);
@@ -161,6 +165,7 @@ class BookApiTest extends AbstractSpringBootTest {
                     .doesNotThrowAnyException())
             .jsonPath(Json.STUDY_ID).isEqualTo(studyId)
             .jsonPath(Json.NAME).isEqualTo("Black")
+            .jsonPath(Json.COLOR).isEqualTo(Color.BLACK.name())
             .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(1)
             .jsonPath(Json.CHAPTER_ID, 0).isNotEmpty()
             .jsonPath(Json.CHAPTER_ID, 0).value(id -> chapterId.set(id.toString()))
@@ -208,7 +213,6 @@ class BookApiTest extends AbstractSpringBootTest {
             .get()
             .uri(Api.BOOK, UUID.randomUUID())
             .exchange()
-            .expectStatus().isNotFound()
             .expectStatus().isNotFound();
     }
 
@@ -225,6 +229,7 @@ class BookApiTest extends AbstractSpringBootTest {
         this.saveBook(BookBuilder.builder()
             .id(bookId)
             .name(bookName)
+            .color(Color.WHITE)
             .withChapter(chapter -> chapter
                 .id(chapterId)
                 .title("Queen's gambit")
@@ -267,6 +272,7 @@ class BookApiTest extends AbstractSpringBootTest {
             .expectBody()
             .jsonPath(Json.ID).isEqualTo(bookId.toString())
             .jsonPath(Json.NAME).isEqualTo(bookName)
+            .jsonPath(Json.COLOR).isEqualTo(Color.WHITE.name())
             .jsonPath(Json.CHAPTERS_SIZE).isEqualTo(1)
             .jsonPath(Json.CHAPTER_ID, 0).isEqualTo(chapterId.toString())
             .jsonPath(Json.CHAPTER_TITLE, 0).isEqualTo("Queen's gambit")
@@ -312,11 +318,11 @@ class BookApiTest extends AbstractSpringBootTest {
         this.cleanDatabase();
 
         this.webTestClient
-                .get()
-                .uri(Api.BOOKS)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody();
+            .get()
+            .uri(Api.BOOKS)
+            .exchange()
+            .expectStatus().isNoContent()
+            .expectBody();
     }
 
     @Test
@@ -330,6 +336,7 @@ class BookApiTest extends AbstractSpringBootTest {
         this.saveBook(BookBuilder.builder()
             .id(book1Id)
             .name("White")
+            .color(Color.WHITE)
             .studyId("random-1")
             .withChapter(chapter -> chapter
                 .title("Queen's gambit"))
@@ -338,6 +345,7 @@ class BookApiTest extends AbstractSpringBootTest {
         this.saveBook(BookBuilder.builder()
             .id(book2Id)
             .name("Black")
+            .color(Color.BLACK)
             .studyId("random-2")
             .withChapter(chapter -> chapter
                 .title("Caro-Kann"))
@@ -354,11 +362,13 @@ class BookApiTest extends AbstractSpringBootTest {
             .jsonPath("$.[0].id").isEqualTo(book1Id.toString())
             .jsonPath("$.[0].studyId").doesNotExist()
             .jsonPath("$.[0].name").isEqualTo("White")
+            .jsonPath("$.[0].color").isEqualTo(Color.WHITE.name())
             .jsonPath("$.[0].chapters").doesNotExist()
             .jsonPath("$.[0].lines").doesNotExist()
             .jsonPath("$.[1].id").isEqualTo(book2Id.toString())
             .jsonPath("$.[1].studyId").doesNotExist()
             .jsonPath("$.[1].name").isEqualTo("Black")
+            .jsonPath("$.[1].color").isEqualTo(Color.BLACK.name())
             .jsonPath("$.[1].chapters").doesNotExist()
             .jsonPath("$.[1].lines").doesNotExist();
     }
@@ -381,6 +391,7 @@ class BookApiTest extends AbstractSpringBootTest {
         this.saveBook(BookBuilder.builder()
             .id(bookId)
             .name("White")
+            .color(Color.WHITE)
             .build());
 
         this.webTestClient
@@ -405,6 +416,7 @@ class BookApiTest extends AbstractSpringBootTest {
         this.saveBook(BookBuilder.builder()
             .id(bookId)
             .name("White")
+            .color(Color.WHITE)
             .withChapter(chapter -> chapter
                 .id(chapter1Id)
                 .title("Queen's gambit - Introduction")

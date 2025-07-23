@@ -1,9 +1,6 @@
 package io.github.fifi2.chessmorize.converter;
 
-import io.github.fifi2.chessmorize.model.Book;
-import io.github.fifi2.chessmorize.model.Chapter;
-import io.github.fifi2.chessmorize.model.Move;
-import io.github.fifi2.chessmorize.model.Nag;
+import io.github.fifi2.chessmorize.model.*;
 import io.github.fifi2.chessmorize.service.pgn.PgnGame;
 import io.github.fifi2.chessmorize.service.pgn.PgnNag;
 import io.github.fifi2.chessmorize.service.pgn.PgnNode;
@@ -19,16 +16,19 @@ public class PgnGamesToBookConverter {
      * Convert some PgnGames, from Lichess PGN parsing, into a Book.
      *
      * @param pgnGames The list of PgnGames to convert.
+     * @param color    is the player color.
      * @return A Book.
      */
     public Book convert(final List<PgnGame> pgnGames,
-                        final String studyId) {
+                        final String studyId,
+                        final Color color) {
 
         final String studyName = this.getStudyName(pgnGames);
         return Book.builder()
             .id(UUID.randomUUID())
             .studyId(studyId)
             .name(studyName)
+            .color(color)
             .chapters(this.buildChapters(pgnGames, studyName))
             .build();
     }

@@ -5,10 +5,7 @@ import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
 import io.github.fifi2.chessmorize.error.exception.ChapterNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
-import io.github.fifi2.chessmorize.model.Book;
-import io.github.fifi2.chessmorize.model.Line;
-import io.github.fifi2.chessmorize.model.LineMove;
-import io.github.fifi2.chessmorize.model.Move;
+import io.github.fifi2.chessmorize.model.*;
 import io.github.fifi2.chessmorize.repository.BookRepository;
 import io.github.fifi2.chessmorize.service.pgn.PgnGame;
 import io.github.fifi2.chessmorize.service.pgn.PgnParser;
@@ -44,15 +41,18 @@ public class BookService {
      * a Mono.
      *
      * @param studyId is the study id.
+     * @param color is the player color (WHITE or BLACK).
      * @return a Mono of Book.
      */
-    public Mono<Book> createBook(final String studyId) {
+    public Mono<Book> createBook(final String studyId,
+                                 final Color color) {
 
         return this.lichessApiClient.getStudyPGN(studyId)
             .map(pgn -> parsePgn(pgn, studyId))
             .map(pgnGames -> this.pgnGamesToBookConverter.convert(
                 pgnGames,
-                studyId))
+                studyId,
+                color))
             .doOnNext(book -> book.setLines(this.createLines(book)))
             .flatMap(this.bookRepository::save);
     }

@@ -4,6 +4,7 @@ import io.github.fifi2.chessmorize.api.LichessApiClient;
 import io.github.fifi2.chessmorize.config.properties.TrainingProperties;
 import io.github.fifi2.chessmorize.converter.PgnGamesToBookConverter;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
+import io.github.fifi2.chessmorize.helper.builder.BookBuilder;
 import io.github.fifi2.chessmorize.model.*;
 import io.github.fifi2.chessmorize.repository.BookRepository;
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,9 +59,11 @@ class BookServiceTest {
         Mockito
             .when(this.pgnGamesToBookConverterMock.convert(
                 Mockito.anyList(),
-                Mockito.eq(STUDY_ID)))
+                Mockito.eq(STUDY_ID),
+                Mockito.eq(Color.WHITE)))
             .thenReturn(Book.builder()
                 .studyId(STUDY_ID)
+                .color(Color.WHITE)
                 .chapters(List.of())
                 .build());
 
@@ -77,8 +77,9 @@ class BookServiceTest {
             .thenReturn(isShuffled);
 
         StepVerifier
-            .create(this.bookService.createBook(STUDY_ID))
-            .expectNextMatches(book -> STUDY_ID.equals(book.getStudyId()))
+            .create(this.bookService.createBook(STUDY_ID, Color.WHITE))
+            .expectNextMatches(book -> STUDY_ID.equals(book.getStudyId())
+                && Color.WHITE.equals(book.getColor()))
             .verifyComplete();
 
         Mockito
@@ -100,13 +101,13 @@ class BookServiceTest {
                 """));
 
         StepVerifier
-            .create(this.bookService.createBook(STUDY_ID))
+            .create(this.bookService.createBook(STUDY_ID, Color.WHITE))
             .expectError(PgnException.class)
             .verify();
 
         Mockito
             .verify(this.pgnGamesToBookConverterMock, Mockito.never())
-            .convert(Mockito.anyList(), Mockito.anyString());
+            .convert(Mockito.anyList(), Mockito.anyString(), Mockito.any());
 
         Mockito
             .verify(this.bookRepositoryMock, Mockito.never())
@@ -341,36 +342,28 @@ class BookServiceTest {
             chapter1, UUID.randomUUID(),
             chapter2, UUID.randomUUID());
 
-        // TODO Create an helper class to handle Books, Chapters, Lines, etc.
-        final BiFunction<UUID, Boolean, Chapter> chapterBuilder =
-            (chapterId, enabled) -> Chapter.builder()
-                .id(chapterId)
-                .enabled(enabled)
-                .build();
-
-        // TODO Create an helper class to handle Books, Chapters, Lines, etc.
-        final Function<UUID, Line> lineBuilder =
-            chapterId -> Line.builder()
-                .chapterId(chapterId)
-                .build();
-
-        final List<Line> lines = new ArrayList<>();
-        if (initialStatusChapter1)
-            lines.add(lineBuilder.apply(chapters.get(chapter1)));
-        if (initialStatusChapter2)
-            lines.add(lineBuilder.apply(chapters.get(chapter2)));
-
-        final Book book = Book.builder()
+        BookBuilder bookBuilder = BookBuilder.builder()
             .id(bookId)
-            .chapters(List.of(
-                chapterBuilder.apply(chapters.get(chapter1), initialStatusChapter1),
-                chapterBuilder.apply(chapters.get(chapter2), initialStatusChapter2)))
-            .lines(lines)
-            .build();
+            .withChapter(chapter -> chapter
+                .id(chapters.get(chapter1))
+                .enabled(initialStatusChapter1))
+            .withChapter(chapter -> chapter
+                .id(chapters.get(chapter2))
+                .enabled(initialStatusChapter2));
+
+        if (initialStatusChapter1)
+            bookBuilder = bookBuilder
+                .withLine(line -> line
+                    .chapterId(chapters.get(chapter1)));
+
+        if (initialStatusChapter2)
+            bookBuilder = bookBuilder
+                .withLine(line -> line
+                    .chapterId(chapters.get(chapter2)));
 
         Mockito
             .when(this.bookRepositoryMock.findById(bookId))
-            .thenReturn(Mono.just(book));
+            .thenReturn(Mono.just(bookBuilder.build()));
 
         Mockito
             .when(this.bookRepositoryMock.update(Mockito.any()))

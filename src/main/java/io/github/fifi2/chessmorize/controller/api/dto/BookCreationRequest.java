@@ -1,7 +1,9 @@
 package io.github.fifi2.chessmorize.controller.api.dto;
 
+import io.github.fifi2.chessmorize.model.Color;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +27,14 @@ public class BookCreationRequest {
         description = "The lichess study id",
         requiredMode = REQUIRED)
     private String studyId;
+
+    @NotNull
+    @Schema(
+        description = """
+            The color of the book, meaning the side played in the study.
+            Possible values are: `WHITE` or `BLACK`
+            """,
+        requiredMode = REQUIRED)
+    private Color color;
 
 }

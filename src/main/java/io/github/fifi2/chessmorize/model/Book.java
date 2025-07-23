@@ -27,6 +27,14 @@ public class Book {
         example = "White")
     private String name;
 
+    @Schema(
+        description = """
+            The color of the book, meaning the side played in the study.
+            Possible values are: `WHITE` or `BLACK`
+            """,
+        example = "WHITE")
+    private Color color;
+
     @Schema(description = "The imported chapters")
     private List<Chapter> chapters;
 

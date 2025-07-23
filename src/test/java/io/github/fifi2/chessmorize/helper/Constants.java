@@ -27,6 +27,7 @@ public abstract class Constants {
         public static final String ID = ROOT + ".id";
         public static final String STUDY_ID = ROOT + ".studyId";
         public static final String NAME = ROOT + ".name";
+        public static final String COLOR = ROOT + ".color";
         public static final String CHAPTERS = ROOT + ".chapters";
         public static final String CHAPTERS_SIZE = CHAPTERS + SIZE;
         private static final String LINES = ROOT + ".lines";

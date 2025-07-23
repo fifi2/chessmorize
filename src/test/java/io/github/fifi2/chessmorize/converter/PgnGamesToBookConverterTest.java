@@ -1,9 +1,6 @@
 package io.github.fifi2.chessmorize.converter;
 
-import io.github.fifi2.chessmorize.model.Book;
-import io.github.fifi2.chessmorize.model.Chapter;
-import io.github.fifi2.chessmorize.model.Move;
-import io.github.fifi2.chessmorize.model.Nag;
+import io.github.fifi2.chessmorize.model.*;
 import io.github.fifi2.chessmorize.service.pgn.PgnGame;
 import io.github.fifi2.chessmorize.service.pgn.PgnNag;
 import io.github.fifi2.chessmorize.service.pgn.PgnNode;
@@ -32,11 +29,13 @@ class PgnGamesToBookConverterTest {
             List.of(
                 PgnGame.builder().build(),
                 PgnGame.builder().build()),
-            studyId);
+            studyId,
+            Color.WHITE);
 
         assertThat(book.getId()).isInstanceOf(UUID.class);
         assertThat(book.getStudyId()).isEqualTo(studyId);
         assertThat(book.getName()).isNull();
+        assertThat(book.getColor()).isEqualTo(Color.WHITE);
         assertThat(book.getChapters()).hasSize(2);
     }
 

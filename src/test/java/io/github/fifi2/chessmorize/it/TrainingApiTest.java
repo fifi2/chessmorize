@@ -1,11 +1,12 @@
 package io.github.fifi2.chessmorize.it;
 
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.TrainingResultRequest;
-import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.helper.builder.BookBuilder;
 import io.github.fifi2.chessmorize.helper.builder.LineBuilder;
 import io.github.fifi2.chessmorize.model.Book;
+import io.github.fifi2.chessmorize.model.Color;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -110,9 +111,11 @@ class TrainingApiTest extends AbstractSpringBootTest {
             // No lines
             Arguments.of(BookBuilder.builder()
                 .id(UUID.randomUUID())
+                .color(Color.BLACK)
                 .build()),
             // No lines to train
             Arguments.of(BookBuilder.builder()
+                .color(Color.WHITE)
                 .calendarSlot(2) // boxes 0, 2
                 .withChapter(chapterId, "Chapter title")
                 .withLine(lineBuilder.andThen(line -> line.boxId(1)))
@@ -121,6 +124,7 @@ class TrainingApiTest extends AbstractSpringBootTest {
             // during the session.
             Arguments.of(BookBuilder.builder()
                 .calendarSlot(2) // boxes 0, 2
+                .color(Color.WHITE)
                 .withChapter(chapterId, "Chapter title")
                 .withLine(lineBuilder.andThen(line -> line
                     .boxId(0)
@@ -153,6 +157,7 @@ class TrainingApiTest extends AbstractSpringBootTest {
 
         this.saveBook(BookBuilder.builder()
             .id(bookId)
+            .color(Color.BLACK)
             .withChapter(introChapterId, "Caro-Kann, Introduction")
             .withChapter(shortChapterId, "Caro-Kann, Short variation")
             .withChapter(karpovChapterId, "Caro-Kann, Karpov")
@@ -182,6 +187,7 @@ class TrainingApiTest extends AbstractSpringBootTest {
 
         this.saveBook(BookBuilder.builder()
             .id(bookId)
+            .color(Color.BLACK)
             .withChapter(introChapterId, "Caro-Kann, Introduction")
             .withChapter(shortChapterId, "Caro-Kann, Short variation")
             .withChapter(karpovChapterId, "Caro-Kann, Karpov")
@@ -230,6 +236,7 @@ class TrainingApiTest extends AbstractSpringBootTest {
 
         this.saveBook(BookBuilder.builder()
             .id(bookId)
+            .color(Color.BLACK)
             .calendarSlot(2) // boxes 0, 2
             .withChapter(introChapterId, "Caro-Kann, Introduction")
             .withChapter(shortChapterId, "Caro-Kann, Short variation")
@@ -282,6 +289,7 @@ class TrainingApiTest extends AbstractSpringBootTest {
 
         this.saveBook(BookBuilder.builder()
             .id(bookId)
+            .color(Color.BLACK)
             .calendarSlot(1) // boxes 0, 1
             .withChapter(introChapterId, "Caro-Kann, Introduction")
             .withChapter(shortChapterId, "Caro-Kann, Short variation")

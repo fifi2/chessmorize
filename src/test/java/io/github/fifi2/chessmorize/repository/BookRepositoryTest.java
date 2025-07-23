@@ -6,6 +6,7 @@ import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.BookSerDeException;
 import io.github.fifi2.chessmorize.model.Book;
+import io.github.fifi2.chessmorize.model.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -203,6 +204,7 @@ class BookRepositoryTest extends AbstractSpringBootTest {
             .id(bookId)
             .studyId(UUID.randomUUID().toString())
             .name(UUID.randomUUID().toString())
+            .color(Color.WHITE)
             .chapters(List.of())
             .build());
     }

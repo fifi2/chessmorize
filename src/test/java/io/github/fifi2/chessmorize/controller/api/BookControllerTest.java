@@ -1,5 +1,6 @@
 package io.github.fifi2.chessmorize.controller.api;
 
+import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.controller.api.dto.BookCreationRequest;
 import io.github.fifi2.chessmorize.controller.api.dto.ToggleChapterRequest;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
@@ -8,8 +9,8 @@ import io.github.fifi2.chessmorize.error.exception.lichess.Lichess5xxException;
 import io.github.fifi2.chessmorize.error.exception.lichess.LichessNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.lichess.LichessTimeoutException;
 import io.github.fifi2.chessmorize.error.exception.pgn.PgnException;
-import io.github.fifi2.chessmorize.AbstractSpringBootTest;
 import io.github.fifi2.chessmorize.model.Book;
+import io.github.fifi2.chessmorize.model.Color;
 import io.github.fifi2.chessmorize.service.BookService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,19 +40,22 @@ class BookControllerTest extends AbstractSpringBootTest {
     private BookService bookService;
 
     @DisplayName("Recognize bad request:")
-    @ParameterizedTest(name = "{index}: having studyId={0}")
+    @ParameterizedTest(name = "{index}: having studyId={0} and color={1}")
     @CsvSource(delimiter = '|', nullValues = "null", textBlock = """
-        null
-        ''
-        too-long-id
+        null        | WHITE
+        ''          | BLACK
+        too-long-id | WHITE
+        study-id    | null
         """)
-    void postBook_withInvalidInput(final String studyId) {
+    void postBook_withInvalidInput(final String studyId,
+                                   final Color color) {
 
         this.webTestClient
             .post()
             .uri(Api.BOOKS)
             .bodyValue(BookCreationRequest.builder()
                 .studyId(studyId)
+                .color(color)
                 .build())
             .exchange()
             .expectStatus().isBadRequest();
@@ -86,7 +90,9 @@ class BookControllerTest extends AbstractSpringBootTest {
                                 final HttpStatus expectedStatus) {
 
         Mockito
-            .when(this.bookService.createBook(Mockito.anyString()))
+            .when(this.bookService.createBook(
+                Mockito.anyString(),
+                Mockito.any()))
             .thenReturn(Mono.error(mockedException));
 
         this.webTestClient
@@ -94,6 +100,7 @@ class BookControllerTest extends AbstractSpringBootTest {
             .uri(Api.BOOKS)
             .bodyValue(BookCreationRequest.builder()
                 .studyId("study-id")
+                .color(Color.WHITE)
                 .build())
             .exchange()
             .expectStatus().isEqualTo(expectedStatus);
@@ -106,10 +113,9 @@ class BookControllerTest extends AbstractSpringBootTest {
         final UUID bookId = UUID.randomUUID();
 
         Mockito
-            .when(this.bookService.createBook(studyId))
+            .when(this.bookService.createBook(studyId, Color.WHITE))
             .thenReturn(Mono.just(Book.builder()
                 .id(bookId)
-                .studyId(studyId)
                 .build()));
 
         this.webTestClient
@@ -117,6 +123,7 @@ class BookControllerTest extends AbstractSpringBootTest {
             .uri(Api.BOOKS)
             .bodyValue(BookCreationRequest.builder()
                 .studyId(studyId)
+                .color(Color.WHITE)
                 .build())
             .exchange()
             .expectStatus().isCreated()

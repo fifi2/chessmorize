@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.fifi2.chessmorize.error.exception.BookNotFoundException;
 import io.github.fifi2.chessmorize.error.exception.BookSerDeException;
 import io.github.fifi2.chessmorize.model.Book;
+import io.github.fifi2.chessmorize.model.Color;
 import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Repository;
@@ -18,8 +19,8 @@ import java.util.UUID;
 public class BookRepository {
 
     private static final String INSERT_ONE_BOOK = """
-        INSERT INTO book (id, name, state)
-        VALUES (:id, :name, :state)
+        INSERT INTO book (id, name, color, state)
+        VALUES (:id, :name, :color, :state)
         """;
     private static final String UPDATE_ONE_BOOK = """
         UPDATE book
@@ -32,7 +33,7 @@ public class BookRepository {
         WHERE id = :id
         """;
     private static final String SELECT_ALL_BOOKS = """
-        SELECT id, name
+        SELECT id, name, color
         FROM book
         """;
     private static final String DELETE_ONE_BOOK = """
@@ -42,6 +43,7 @@ public class BookRepository {
     private static final String DELETE_ALL_BOOKS = "DELETE FROM book";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_COLOR = "color";
     private static final String FIELD_STATE = "state";
 
     private final DatabaseClient databaseClient;
@@ -61,6 +63,7 @@ public class BookRepository {
                 .sql(INSERT_ONE_BOOK)
                 .bind(FIELD_ID, book.getId())
                 .bind(FIELD_NAME, book.getName())
+                .bind(FIELD_COLOR, book.getColor().name())
                 .bind(FIELD_STATE, state)
                 .fetch()
                 .rowsUpdated())
@@ -119,6 +122,7 @@ public class BookRepository {
             .map(row -> Book.builder()
                 .id(row.get(FIELD_ID, UUID.class))
                 .name(row.get(FIELD_NAME, String.class))
+                .color(Color.valueOf(row.get(FIELD_COLOR, String.class)))
                 .build())
             .all();
     }
