@@ -37,6 +37,11 @@ public class Move {
         example = "It's a good opening move")
     private String comment;
 
+    @Schema(
+        description = "The Color of the player making the move",
+        example = "WHITE")
+    private Color color;
+
     @Schema(description = "The next moves, as a list of Move")
     private List<Move> nextMoves;
 

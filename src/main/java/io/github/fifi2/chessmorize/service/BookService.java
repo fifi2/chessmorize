@@ -41,7 +41,7 @@ public class BookService {
      * a Mono.
      *
      * @param studyId is the study id.
-     * @param color is the player color (WHITE or BLACK).
+     * @param color   is the player color (WHITE or BLACK).
      * @return a Mono of Book.
      */
     public Mono<Book> createBook(final String studyId,
@@ -101,7 +101,7 @@ public class BookService {
             .stream()
             .flatMap(chapter -> chapter.getNextMoves()
                 .stream()
-                .flatMap(this::buildChapterLines)
+                .flatMap(m -> this.buildChapterLines(m, book.getColor()))
                 .map(moveIds -> Line.builder()
                     .id(UUID.randomUUID())
                     .chapterId(chapter.getId())
@@ -121,11 +121,17 @@ public class BookService {
      * @param move is the Move to flatten.
      * @return A Stream of List of LineMove.
      */
-    Stream<List<LineMove>> buildChapterLines(final Move move) {
+    Stream<List<LineMove>> buildChapterLines(final Move move,
+                                             final Color color) {
 
         final List<Move> nextMoves = Optional
             .ofNullable(move.getNextMoves())
-            .orElse(List.of());
+            .orElse(List.of())
+            .stream()
+            .filter(m -> m.getNag() == null
+                || m.getNag().mustBeTrained()
+                || m.getColor() != color)
+            .toList();
 
         final LineMove currentLineMove = LineMove.builder()
             .moveId(move.getId())
@@ -139,7 +145,7 @@ public class BookService {
 
         return nextMoves
             .stream()
-            .flatMap(nextMove -> this.buildChapterLines(nextMove)
+            .flatMap(nextMove -> this.buildChapterLines(nextMove, color)
                 .map(followingPath -> Stream.concat(
                         Stream.of(currentLineMove),
                         followingPath.stream())

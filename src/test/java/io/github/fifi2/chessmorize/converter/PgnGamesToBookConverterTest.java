@@ -75,7 +75,7 @@ class PgnGamesToBookConverterTest {
     @Test
     void buildMove() {
 
-        final PgnNode pgnNode = PgnNode.builder()
+        final Move move = this.converter.buildMove(PgnNode.builder()
             .san("Nf3")
             .nag(PgnNag.GOOD_MOVE)
             .comment("Knight move")
@@ -84,14 +84,13 @@ class PgnGamesToBookConverterTest {
                 PgnNode.builder().san("c5").build()))
             .fen("rnbqkbnr/ppp2ppp/8/4P3/2Pp4/5N2/PP2PPPP/RNBQKB1R b KQkq - 1 4")
             .uci("g1f3")
-            .build();
-
-        final Move move = this.converter.buildMove(pgnNode);
+            .build());
 
         assertThat(move.getSan()).isEqualTo("Nf3");
         assertThat(move.getUci()).isEqualTo("g1f3");
         assertThat(move.getNag()).isEqualTo(Nag.GOOD_MOVE);
         assertThat(move.getComment()).isEqualTo("Knight move");
+        assertThat(move.getColor()).isEqualTo(Color.WHITE);
         final List<Move> nextMoves = move.getNextMoves();
         assertThat(nextMoves).hasSize(2);
         assertThat(nextMoves.getFirst().getSan()).isEqualTo("Nc6");
@@ -112,6 +111,19 @@ class PgnGamesToBookConverterTest {
     void buildNag(final PgnNag pgnNag, final Nag nag) {
 
         assertThat(this.converter.buildNag(pgnNag)).isEqualTo(nag);
+    }
+
+    @DisplayName("Build Color from FEN:")
+    @ParameterizedTest(name = "{index}: when FEN is {0} then Color is {1}")
+    @CsvSource(delimiter = '|', textBlock = """
+        rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1   | WHITE
+        rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2 | BLACK
+        """)
+    void buildColorFromFen(final String fen,
+                           final Color expectedColor) {
+
+        assertThat(this.converter.buildColorFromFen(fen))
+            .isEqualTo(expectedColor);
     }
 
 }

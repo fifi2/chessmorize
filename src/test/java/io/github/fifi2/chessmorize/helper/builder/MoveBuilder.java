@@ -1,5 +1,6 @@
 package io.github.fifi2.chessmorize.helper.builder;
 
+import io.github.fifi2.chessmorize.model.Color;
 import io.github.fifi2.chessmorize.model.Move;
 import io.github.fifi2.chessmorize.model.Nag;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,12 @@ public class MoveBuilder {
     public MoveBuilder comment(final String comment) {
 
         this.move.setComment(comment);
+        return this;
+    }
+
+    public MoveBuilder color(final Color color) {
+
+        this.move.setColor(color);
         return this;
     }
 

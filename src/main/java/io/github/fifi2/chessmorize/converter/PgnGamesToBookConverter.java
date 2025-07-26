@@ -78,6 +78,7 @@ public class PgnGamesToBookConverter {
             .uci(pgnNode.getUci())
             .nag(this.buildNag(pgnNode.getNag()))
             .comment(pgnNode.getComment())
+            .color(this.buildColorFromFen(pgnNode.getFen()))
             .nextMoves(Optional
                 .ofNullable(pgnNode.getVariations())
                 .orElse(List.of())
@@ -103,6 +104,24 @@ public class PgnGamesToBookConverter {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    /**
+     * Build the Color of the move from the FEN string.
+     *
+     * @param fen is the FEN string to convert.
+     * @return a Color (BLACK or WHITE).
+     */
+    Color buildColorFromFen(final String fen) {
+
+        if (fen == null || fen.isBlank())
+            return null;
+
+        final String activeColor = fen.split(" ")[1];
+
+        // Note: The FEN format uses "w" for white's turn and "b" for black's
+        // turn, so we need to invert it to determine which player just moved.
+        return "w".equals(activeColor) ? Color.BLACK : Color.WHITE;
     }
 
 }

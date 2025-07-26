@@ -33,4 +33,15 @@ public enum Nag {
 
     private final String glyph;
 
+    /**
+     * Checks if the NAG represents a move that should be trained. For example,
+     * not a mistake included in the upstream study for educational purposes.
+     *
+     * @return true if the NAG should be trained, false otherwise.
+     */
+    public boolean mustBeTrained() {
+
+        return this == GOOD_MOVE || this == BRILLANT_MOVE;
+    }
+
 }

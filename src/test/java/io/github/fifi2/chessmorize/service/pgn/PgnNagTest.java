@@ -1,6 +1,7 @@
 package io.github.fifi2.chessmorize.service.pgn;
 
 import io.github.fifi2.chessmorize.service.pgn.PgnNag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 

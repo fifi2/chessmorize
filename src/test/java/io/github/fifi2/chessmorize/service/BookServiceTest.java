@@ -269,6 +269,10 @@ class BookServiceTest {
         final UUID id113 = UUID.randomUUID();
         final UUID id121 = UUID.randomUUID();
         final UUID id1111 = UUID.randomUUID();
+        final UUID id13 = UUID.randomUUID();
+        final UUID id131 = UUID.randomUUID();
+        final UUID id14 = UUID.randomUUID();
+        final UUID id141 = UUID.randomUUID();
 
         final Move move = Move.builder()
             .id(id1)
@@ -297,14 +301,32 @@ class BookServiceTest {
                         Move.builder()
                             .id(id121)
                             .build()))
+                    .build(),
+                // A mistake for educational purposes, not to inline.
+                Move.builder()
+                    .id(id13)
+                    .color(Color.WHITE)
+                    .nag(Nag.MISTAKE)
+                    .nextMoves(List.of(Move.builder()
+                        .id(id131)
+                        .build()))
+                    .build(),
+                // A mistake an adversary could play, to inline.
+                Move.builder()
+                    .id(id14)
+                    .color(Color.BLACK)
+                    .nag(Nag.MISTAKE)
+                    .nextMoves(List.of(Move.builder()
+                        .id(id141)
+                        .build()))
                     .build()))
             .build();
 
         final List<List<LineMove>> moves = this.bookService
-            .buildChapterLines(move)
+            .buildChapterLines(move, Color.WHITE)
             .toList();
 
-        assertThat(moves).hasSize(4);
+        assertThat(moves).hasSize(5);
         assertThat(moves.getFirst().getFirst().getComment())
             .isEqualTo("comment");
         assertThat(moves.getFirst())
@@ -316,9 +338,12 @@ class BookServiceTest {
         assertThat(moves.get(2))
             .extracting(LineMove::getMoveId)
             .containsExactly(id1, id11, id113);
-        assertThat(moves.getLast())
+        assertThat(moves.get(3))
             .extracting(LineMove::getMoveId)
             .containsExactly(id1, id12, id121);
+        assertThat(moves.getLast())
+            .extracting(LineMove::getMoveId)
+            .containsExactly(id1, id14, id141);
     }
 
     @ParameterizedTest
