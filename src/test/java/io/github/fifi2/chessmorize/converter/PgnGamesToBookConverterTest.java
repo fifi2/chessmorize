@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,53 +25,22 @@ class PgnGamesToBookConverterTest {
 
         final String studyId = "studyId";
         final Book book = this.converter.convert(
-            List.of(
-                PgnGame.builder().build(),
-                PgnGame.builder().build()),
+            getSamplePngGames(),
             studyId,
             Color.WHITE);
 
         assertThat(book.getId()).isInstanceOf(UUID.class);
         assertThat(book.getStudyId()).isEqualTo(studyId);
-        assertThat(book.getName()).isNull();
+        assertThat(book.getName()).isEqualTo("Study");
         assertThat(book.getColor()).isEqualTo(Color.WHITE);
         assertThat(book.getChapters()).hasSize(2);
     }
 
     @Test
-    void getStudyName() {
-
-        final List<PgnGame> pgnGames = Stream.of(
-                "Study: Black: Part 1: chapter 1",
-                "Study: Black: Part 2: chapter 1",
-                "Study: Black: Part 2: chapter 2")
-            .map(chapterName -> PgnGame.builder()
-                .tags(Map.of("Event", chapterName))
-                .build())
-            .toList();
-
-        assertThat(this.converter.getStudyName(pgnGames))
-            .isEqualTo("Study: Black");
-    }
-
-    @Test
     void buildChapters() {
 
-        final List<PgnGame> pgnGames = List.of(
-            PgnGame.builder()
-                .tags(Map.of("Event", "Study: chapter 1"))
-                .nodes(List.of(
-                    PgnNode.builder().build(),
-                    PgnNode.builder().build()))
-                .build(),
-            PgnGame.builder()
-                .tags(Map.of("Event", "Study: chapter 2"))
-                .nodes(List.of(PgnNode.builder().build()))
-                .build());
-
         final List<Chapter> chapters = this.converter.buildChapters(
-            pgnGames,
-            "Study");
+            getSamplePngGames());
 
         assertThat(chapters).hasSize(2);
         final Chapter firstChapter = chapters.getFirst();
@@ -83,22 +51,25 @@ class PgnGamesToBookConverterTest {
         assertThat(secondChapter.getNextMoves()).hasSize(1);
     }
 
-    @DisplayName("Remove study name from chapter name:")
-    @ParameterizedTest(
-        name = "{index}: with study name <{0}> and chapter name <{1}>")
-    @CsvSource(delimiter = '|', textBlock = """
-        My study: chapter 1         | My study         | chapter 1
-        My study : chapter 1        | My study         | chapter 1
-        My study (White): chapter 1 | My study (White) | chapter 1
-        """)
-    void cleanChapterName(final String chapterName,
-                          final String studyName,
-                          final String expectedChapterName) {
+    private static List<PgnGame> getSamplePngGames() {
 
-        final String cleanedChapterName = this.converter.cleanChapterName(
-            chapterName,
-            studyName);
-        assertThat(cleanedChapterName).isEqualTo(expectedChapterName);
+        return List.of(
+            PgnGame.builder()
+                .tags(Map.of(
+                    "Event", "Study: chapter 1",
+                    "StudyName", "Study",
+                    "ChapterName", "chapter 1"))
+                .nodes(List.of(
+                    PgnNode.builder().build(),
+                    PgnNode.builder().build()))
+                .build(),
+            PgnGame.builder()
+                .tags(Map.of(
+                    "Event", "Study: chapter 2",
+                    "StudyName", "Study",
+                    "ChapterName", "chapter 2"))
+                .nodes(List.of(PgnNode.builder().build()))
+                .build());
     }
 
     @Test

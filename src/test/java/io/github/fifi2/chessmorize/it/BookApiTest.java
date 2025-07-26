@@ -51,6 +51,8 @@ class BookApiTest extends AbstractSpringBootTest {
 
         lichessMock.mockResponse("""
             [Event "White: Queen's gambit"]
+            [StudyName "White"]
+            [ChapterName "Queen's gambit"]
             
             1. d4 { Queen's opening } d5 2. c4 *
             """);
@@ -133,6 +135,8 @@ class BookApiTest extends AbstractSpringBootTest {
                 if (status == HttpStatus.OK)
                     lichessMock.mockResponse("""
                         [Event "Black: Caro-Kann"]
+                        [StudyName "Black"]
+                        [ChapterName "Caro-Kann"]
                         
                         1. e4 c6 2. d4 *
                         """);
