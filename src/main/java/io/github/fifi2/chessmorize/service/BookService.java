@@ -128,9 +128,16 @@ public class BookService {
             .ofNullable(move.getNextMoves())
             .orElse(List.of())
             .stream()
+            // Filter out moves that are not relevant for training
+            // (moves marked as mistakes in the study, for educational purposes)
             .filter(m -> m.getNag() == null
                 || m.getNag().mustBeTrained()
                 || m.getColor() != color)
+            // Filter out final move if it is not the same color as the chapter
+            // (e.g. if the chapter is for white, we don't want to keep a black
+            // move without response at the end of a line).
+            .filter(m -> m.getColor() == color
+                || (m.getNextMoves() != null && !m.getNextMoves().isEmpty()))
             .toList();
 
         final LineMove currentLineMove = LineMove.builder()

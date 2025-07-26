@@ -266,40 +266,53 @@ class BookServiceTest {
         final UUID id12 = UUID.randomUUID();
         final UUID id111 = UUID.randomUUID();
         final UUID id112 = UUID.randomUUID();
+        final UUID id1121 = UUID.randomUUID();
         final UUID id113 = UUID.randomUUID();
         final UUID id121 = UUID.randomUUID();
         final UUID id1111 = UUID.randomUUID();
         final UUID id13 = UUID.randomUUID();
         final UUID id131 = UUID.randomUUID();
-        final UUID id14 = UUID.randomUUID();
-        final UUID id141 = UUID.randomUUID();
 
         final Move move = Move.builder()
             .id(id1)
+            .color(Color.BLACK)
             .comment("comment")
             .nextMoves(List.of(
                 Move.builder()
                     .id(id11)
+                    .color(Color.WHITE)
                     .nextMoves(List.of(
+                        // A mistake an adversary could play, to inline.
                         Move.builder()
                             .id(id111)
+                            .color(Color.BLACK)
+                            .nag(Nag.BLUNDER)
                             .nextMoves(List.of(
                                 Move.builder()
                                     .id(id1111)
+                                    .color(Color.WHITE)
                                     .build()))
                             .build(),
                         Move.builder()
                             .id(id112)
+                            .color(Color.BLACK)
+                            .nextMoves(List.of(Move.builder()
+                                .id(id1121)
+                                .color(Color.WHITE)
+                                .build()))
                             .build(),
                         Move.builder()
                             .id(id113)
+                            .color(Color.BLACK)
                             .build()))
                     .build(),
                 Move.builder()
                     .id(id12)
+                    .color(Color.WHITE)
                     .nextMoves(List.of(
                         Move.builder()
                             .id(id121)
+                            .color(Color.BLACK)
                             .build()))
                     .build(),
                 // A mistake for educational purposes, not to inline.
@@ -309,15 +322,7 @@ class BookServiceTest {
                     .nag(Nag.MISTAKE)
                     .nextMoves(List.of(Move.builder()
                         .id(id131)
-                        .build()))
-                    .build(),
-                // A mistake an adversary could play, to inline.
-                Move.builder()
-                    .id(id14)
-                    .color(Color.BLACK)
-                    .nag(Nag.MISTAKE)
-                    .nextMoves(List.of(Move.builder()
-                        .id(id141)
+                        .color(Color.BLACK)
                         .build()))
                     .build()))
             .build();
@@ -326,7 +331,7 @@ class BookServiceTest {
             .buildChapterLines(move, Color.WHITE)
             .toList();
 
-        assertThat(moves).hasSize(5);
+        assertThat(moves).hasSize(3);
         assertThat(moves.getFirst().getFirst().getComment())
             .isEqualTo("comment");
         assertThat(moves.getFirst())
@@ -334,16 +339,10 @@ class BookServiceTest {
             .containsExactly(id1, id11, id111, id1111);
         assertThat(moves.get(1))
             .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id11, id112);
-        assertThat(moves.get(2))
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id11, id113);
-        assertThat(moves.get(3))
-            .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id12, id121);
+            .containsExactly(id1, id11, id112, id1121);
         assertThat(moves.getLast())
             .extracting(LineMove::getMoveId)
-            .containsExactly(id1, id14, id141);
+            .containsExactly(id1, id12);
     }
 
     @ParameterizedTest
