@@ -19,6 +19,11 @@ public class LineMove {
     private UUID moveId;
 
     @Schema(
+        description = "The move SAN (Standard Algebraic Notation)",
+        example = "e4")
+    private String san;
+
+    @Schema(
         description = "The move UCI (Universal Chess Interface) notation",
         example = "e2e4")
     private String uci;

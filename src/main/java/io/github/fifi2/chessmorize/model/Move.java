@@ -19,7 +19,7 @@ public class Move {
 
     @Schema(
         description = "The move SAN (Standard Algebraic Notation)",
-        example = "e2")
+        example = "e4")
     private String san;
 
     @Schema(
