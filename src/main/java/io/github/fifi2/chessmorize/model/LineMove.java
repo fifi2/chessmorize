@@ -24,6 +24,11 @@ public class LineMove {
     private String san;
 
     @Schema(
+        description = "The move NAG (Numeric Annotation Glyph)",
+        example = "GOOD_MOVE")
+    private Nag nag;
+
+    @Schema(
         description = "The move UCI (Universal Chess Interface) notation",
         example = "e2e4")
     private String uci;

@@ -103,7 +103,7 @@ class PgnGamesToBookConverterTest {
                          |
         GOOD_MOVE        | GOOD_MOVE
         MISTAKE          | MISTAKE
-        BRILLANT_MOVE    | BRILLANT_MOVE
+        BRILLIANT_MOVE   | BRILLIANT_MOVE
         BLUNDER          | BLUNDER
         SPECULATIVE_MOVE | SPECULATIVE_MOVE
         DUBIOUS_MOVE     | DUBIOUS_MOVE

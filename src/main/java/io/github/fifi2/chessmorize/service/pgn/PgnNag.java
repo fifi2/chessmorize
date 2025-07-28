@@ -12,7 +12,7 @@ public enum PgnNag {
 
     GOOD_MOVE("!"),
     MISTAKE("?"),
-    BRILLANT_MOVE("!!"),
+    BRILLIANT_MOVE("!!"),
     BLUNDER("??"),
     SPECULATIVE_MOVE("!?"),
     DUBIOUS_MOVE("?!");

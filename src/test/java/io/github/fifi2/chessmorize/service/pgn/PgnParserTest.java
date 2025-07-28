@@ -314,7 +314,7 @@ class PgnParserTest {
         // @formatter:off
         assertNode(game.getNodes().getFirst(), "d4", PgnNag.GOOD_MOVE, null, null,
             d5 -> assertNode(d5, "d5", null, null, null,
-            c4 -> assertNode(c4, "c4", PgnNag.BRILLANT_MOVE, null, null,
+            c4 -> assertNode(c4, "c4", PgnNag.BRILLIANT_MOVE, null, null,
             dxc4 -> assertNode(dxc4, "dxc4", PgnNag.SPECULATIVE_MOVE, null, null,
             nc3 -> assertNode(nc3, "Nc3", PgnNag.DUBIOUS_MOVE, null, null,
                 qd5 -> assertNode(qd5, "Qd5", PgnNag.BLUNDER, null, null,

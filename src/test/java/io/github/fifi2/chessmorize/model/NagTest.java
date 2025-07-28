@@ -11,7 +11,7 @@ class NagTest {
     @EnumSource(
         value = Nag.class,
         mode = EnumSource.Mode.EXCLUDE,
-        names = {"GOOD_MOVE", "BRILLANT_MOVE"})
+        names = {"GOOD_MOVE", "BRILLIANT_MOVE"})
     void mustBeTrained_bad(final Nag nag) {
 
         assertThat(nag.mustBeTrained()).isFalse();
@@ -21,7 +21,7 @@ class NagTest {
     @EnumSource(
         value = Nag.class,
         mode = EnumSource.Mode.INCLUDE,
-        names = {"GOOD_MOVE", "BRILLANT_MOVE"})
+        names = {"GOOD_MOVE", "BRILLIANT_MOVE"})
     void mustBeTrained_good(final Nag nag) {
 
         assertThat(nag.mustBeTrained()).isTrue();

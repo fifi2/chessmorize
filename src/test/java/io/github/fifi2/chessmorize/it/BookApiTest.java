@@ -8,10 +8,7 @@ import io.github.fifi2.chessmorize.helper.LichessMockExtension;
 import io.github.fifi2.chessmorize.helper.ObjectWrapper;
 import io.github.fifi2.chessmorize.helper.builder.BookBuilder;
 import io.github.fifi2.chessmorize.helper.converter.StringToList;
-import io.github.fifi2.chessmorize.model.Book;
-import io.github.fifi2.chessmorize.model.Chapter;
-import io.github.fifi2.chessmorize.model.Color;
-import io.github.fifi2.chessmorize.model.Line;
+import io.github.fifi2.chessmorize.model.*;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +51,7 @@ class BookApiTest extends AbstractSpringBootTest {
             [StudyName "White"]
             [ChapterName "Queen's gambit"]
             
-            1. d4 { Queen's opening } d5 2. c4 *
+            1. d4 { Queen's opening } d5 2. c4! *
             """);
 
         // create a book
@@ -94,20 +91,26 @@ class BookApiTest extends AbstractSpringBootTest {
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".san").isEqualTo("c4")
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".comment").isEmpty()
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".uci").isEqualTo("c2c4")
-            .jsonPath(Json.MOVE(0, 0, 0, 0) + ".nag").isEmpty()
+            .jsonPath(Json.MOVE(0, 0, 0, 0) + ".nag").isEqualTo(Nag.GOOD_MOVE.name())
             .jsonPath(Json.MOVE(0, 0, 0, 0) + ".nextMoves").isEmpty()
             .jsonPath(Json.LINES_SIZE).isEqualTo(1)
             .jsonPath(Json.LINE_ID, 0).isNotEmpty()
             .jsonPath(Json.LINE_CHAPTER_ID, 0).isEqualTo(chapterId.get())
             .jsonPath(Json.LINE_MOVES_SIZE, 0).isEqualTo(3)
             .jsonPath(Json.LINE_MOVE_COMMENT, 0, 0).isEqualTo("Queen's opening")
+            .jsonPath(Json.LINE_MOVE_SAN, 0, 0).isEqualTo("d4")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 0).isEqualTo("d2d4")
+            .jsonPath(Json.LINE_MOVE_NAG, 0, 0).doesNotExist()
             .jsonPath(Json.LINE_MOVE_ID, 0, 0).isEqualTo(moveId1.get())
             .jsonPath(Json.LINE_MOVE_COMMENT, 0, 1).isEmpty()
+            .jsonPath(Json.LINE_MOVE_SAN, 0, 1).isEqualTo("d5")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 1).isEqualTo("d7d5")
+            .jsonPath(Json.LINE_MOVE_NAG, 0, 1).doesNotExist()
             .jsonPath(Json.LINE_MOVE_ID, 0, 1).isEqualTo(moveId2.get())
             .jsonPath(Json.LINE_MOVE_COMMENT, 0, 2).isEmpty()
+            .jsonPath(Json.LINE_MOVE_SAN, 0, 2).isEqualTo("c4")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 2).isEqualTo("c2c4")
+            .jsonPath(Json.LINE_MOVE_NAG, 0, 2).isEqualTo(Nag.GOOD_MOVE.name())
             .jsonPath(Json.LINE_MOVE_ID, 0, 2).isEqualTo(moveId3.get())
             .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
             .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()
@@ -200,10 +203,12 @@ class BookApiTest extends AbstractSpringBootTest {
             .jsonPath(Json.LINE_MOVE_ID, 0, 0).isEqualTo(move1Id.get())
             .jsonPath(Json.LINE_MOVE_SAN, 0, 0).isEqualTo("e4")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 0).isEqualTo("e2e4")
+            .jsonPath(Json.LINE_MOVE_NAG, 0, 0).doesNotExist()
             .jsonPath(Json.LINE_MOVE_COMMENT, 0, 0).isEmpty()
             .jsonPath(Json.LINE_MOVE_ID, 0, 1).isEqualTo(move2Id.get())
             .jsonPath(Json.LINE_MOVE_SAN, 0, 1).isEqualTo("c6")
             .jsonPath(Json.LINE_MOVE_UCI, 0, 1).isEqualTo("c7c6")
+            .jsonPath(Json.LINE_MOVE_NAG, 0, 1).doesNotExist()
             .jsonPath(Json.LINE_MOVE_COMMENT, 0, 1).isEmpty()
             .jsonPath(Json.LINE_BOX_ID, 0).isEqualTo(0)
             .jsonPath(Json.LINE_LAST_TRAINING, 0).isEmpty()

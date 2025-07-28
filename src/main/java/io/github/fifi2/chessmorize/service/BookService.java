@@ -143,6 +143,7 @@ public class BookService {
         final LineMove currentLineMove = LineMove.builder()
             .moveId(move.getId())
             .san(move.getSan())
+            .nag(move.getNag())
             .uci(move.getUci())
             .comment(move.getComment())
             .build();

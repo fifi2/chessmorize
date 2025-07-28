@@ -49,6 +49,7 @@ public abstract class Constants {
         private static final String _LINE_MOVE_ID = ".moveId";
         private static final String _LINE_MOVE_SAN = ".san";
         private static final String _LINE_MOVE_UCI = ".uci";
+        private static final String _LINE_MOVE_NAG = ".nag";
         private static final String _LINE_MOVE_COMMENT = ".comment";
         private static final String _LINE_BOX_ID = ".boxId";
         private static final String _LINE_LAST_TRAINING = ".lastTraining";
@@ -65,6 +66,7 @@ public abstract class Constants {
         public static final String LINE_MOVE_ID = LINE_MOVE + _LINE_MOVE_ID;
         public static final String LINE_MOVE_SAN = LINE_MOVE + _LINE_MOVE_SAN;
         public static final String LINE_MOVE_UCI = LINE_MOVE + _LINE_MOVE_UCI;
+        public static final String LINE_MOVE_NAG = LINE_MOVE + _LINE_MOVE_NAG;
         public static final String LINE_MOVE_COMMENT =
             LINE_MOVE + _LINE_MOVE_COMMENT;
         public static final String LINE_BOX_ID = LINE + _LINE_BOX_ID;

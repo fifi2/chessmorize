@@ -13,7 +13,7 @@ class PgnNagTest {
     @CsvSource(delimiter = '|', textBlock = """
         !  | GOOD_MOVE
         ?  | MISTAKE
-        !! | BRILLANT_MOVE
+        !! | BRILLIANT_MOVE
         ?? | BLUNDER
         !? | SPECULATIVE_MOVE
         ?! | DUBIOUS_MOVE

@@ -20,7 +20,7 @@ public enum Nag {
     MISTAKE("?"),
 
     @Schema(description = "A brilliant move")
-    BRILLANT_MOVE("!!"),
+    BRILLIANT_MOVE("!!"),
 
     @Schema(description = "A blunder")
     BLUNDER("??"),
@@ -41,7 +41,7 @@ public enum Nag {
      */
     public boolean mustBeTrained() {
 
-        return this == GOOD_MOVE || this == BRILLANT_MOVE;
+        return this == GOOD_MOVE || this == BRILLIANT_MOVE;
     }
 
 }
